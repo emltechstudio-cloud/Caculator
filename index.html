@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#000000">
+  <meta name="format-detection" content="telephone=no">
+  <title>iOS Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      position: fixed;
+      overscroll-behavior: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      touch-action: manipulation;
+    }
+
+    .calculator {
+      width: 100%;
+      max-width: 390px;
+      background: #000;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-height: 844px;
+    }
+
+    .display {
+      color: #fff;
+      font-size: 80px;
+      font-weight: 200;
+      text-align: right;
+      padding: 40px 20px 20px;
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      word-wrap: break-word;
+      word-break: break-all;
+      line-height: 1;
+      min-height: 120px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 20px 0;
+    }
+
+    button {
+      aspect-ratio: 1;
+      border: none;
+      border-radius: 50%;
+      font-size: 32px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.1s;
+      outline: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:active {
+      filter: brightness(1.2);
+      transform: scale(0.95);
+    }
+
+    .num, .zero {
+      background: #333;
+      color: #fff;
+    }
+
+    .operator {
+      background: #ff9f0a;
+      color: #fff;
+      font-size: 40px;
+    }
+
+    .operator.active {
+      background: #fff;
+      color: #ff9f0a;
+    }
+
+    .function {
+      background: #a5a5a5;
+      color: #000;
+      font-size: 28px;
+    }
+
+    .zero {
+      grid-column: span 2;
+      border-radius: 50px;
+      aspect-ratio: 2.2 / 1;
+      text-align: left;
+      padding-left: 32px;
+    }
+
+    /* Tablet adjustments */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .calculator {
+        max-width: 450px;
+        max-height: 900px;
+      }
+      
+      .display {
+        font-size: 90px;
+      }
+      
+      button {
+        font-size: 36px;
+      }
+      
+      .operator {
+        font-size: 44px;
+      }
+      
+      .function {
+        font-size: 32px;
+      }
+    }
+
+    /* Small mobile devices */
+    @media (max-width: 380px) {
+      .calculator {
+        padding: 15px;
+      }
+      
+      .display {
+        font-size: 64px;
+        padding: 30px 15px 15px;
+      }
+      
+      button {
+        font-size: 26px;
+      }
+      
+      .operator {
+        font-size: 34px;
+      }
+      
+      .function {
+        font-size: 24px;
+      }
+      
+      .buttons {
+        gap: 10px;
+      }
+      
+      .zero {
+        padding-left: 26px;
+      }
+    }
+
+    /* Very small devices (older Android phones) */
+    @media (max-width: 320px) {
+      .display {
+        font-size: 56px;
+      }
+      
+      button {
+        font-size: 24px;
+      }
+      
+      .operator {
+        font-size: 30px;
+      }
+      
+      .function {
+        font-size: 22px;
+      }
+      
+      .buttons {
+        gap: 8px;
+      }
+    }
+
+    /* Large Android phones (6.5" - 7" screens) */
+    @media (min-width: 400px) and (max-width: 480px) {
+      .calculator {
+        max-width: 420px;
+      }
+      
+      .display {
+        font-size: 85px;
+      }
+      
+      button {
+        font-size: 34px;
+      }
+      
+      .operator {
+        font-size: 42px;
+      }
+      
+      .function {
+        font-size: 30px;
+      }
+    }
+
+    /* Foldable phones (unfolded state) */
+    @media (min-width: 600px) and (max-width: 767px) {
+      .calculator {
+        max-width: 480px;
+      }
+      
+      .display {
+        font-size: 90px;
+      }
+    }
+
+    /* Landscape mode */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .calculator {
+        max-height: 100vh;
+        padding: 10px;
+      }
+      
+      .display {
+        min-height: 80px;
+        padding: 20px 15px 10px;
+        font-size: 56px;
+      }
+      
+      .buttons {
+        padding: 10px 0;
+        gap: 8px;
+      }
+      
+      button {
+        font-size: 24px;
+      }
+      
+      .operator {
+        font-size: 30px;
+      }
+      
+      .function {
+        font-size: 22px;
+      }
+    }
+
+    /* Desktop hover effects */
+    @media (hover: hover) {
+      button:hover {
+        filter: brightness(1.1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+      <button class="function" onclick="calc.clear()">AC</button>
+      <button class="function" onclick="calc.toggleSign()">+/-</button>
+      <button class="function" onclick="calc.percent()">%</button>
+      <button class="operator" onclick="calc.setOperation('÷')">÷</button>
+      
+      <button class="num" onclick="calc.inputNumber('7')">7</button>
+      <button class="num" onclick="calc.inputNumber('8')">8</button>
+      <button class="num" onclick="calc.inputNumber('9')">9</button>
+      <button class="operator" onclick="calc.setOperation('×')">×</button>
+      
+      <button class="num" onclick="calc.inputNumber('4')">4</button>
+      <button class="num" onclick="calc.inputNumber('5')">5</button>
+      <button class="num" onclick="calc.inputNumber('6')">6</button>
+      <button class="operator" onclick="calc.setOperation('−')">−</button>
+      
+      <button class="num" onclick="calc.inputNumber('1')">1</button>
+      <button class="num" onclick="calc.inputNumber('2')">2</button>
+      <button class="num" onclick="calc.inputNumber('3')">3</button>
+      <button class="operator" onclick="calc.setOperation('+')">+</button>
+      
+      <button class="zero" onclick="calc.inputNumber('0')">0</button>
+      <button class="num" onclick="calc.inputDecimal()">.</button>
+      <button class="operator" onclick="calc.calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    const calc = {
+      displayValue: '0',
+      firstOperand: null,
+      waitingForSecondOperand: false,
+      operator: null,
+      
+      inputNumber(num) {
+        const display = document.getElementById('display');
+        
+        if (this.waitingForSecondOperand) {
+          this.displayValue = num;
+          this.waitingForSecondOperand = false;
+        } else {
+          this.displayValue = this.displayValue === '0' ? num : this.displayValue + num;
+        }
+        
+        this.updateDisplay();
+      },
+      
+      inputDecimal() {
+        if (this.waitingForSecondOperand) {
+          this.displayValue = '0.';
+          this.waitingForSecondOperand = false;
+          this.updateDisplay();
+          return;
+        }
+        
+        if (!this.displayValue.includes('.')) {
+          this.displayValue += '.';
+          this.updateDisplay();
+        }
+      },
+      
+      clear() {
+        this.displayValue = '0';
+        this.firstOperand = null;
+        this.waitingForSecondOperand = false;
+        this.operator = null;
+        this.clearActiveOperator();
+        this.updateDisplay();
+      },
+      
+      toggleSign() {
+        this.displayValue = String(parseFloat(this.displayValue) * -1);
+        this.updateDisplay();
+      },
+      
+      percent() {
+        this.displayValue = String(parseFloat(this.displayValue) / 100);
+        this.updateDisplay();
+      },
+      
+      setOperation(nextOperator) {
+        const inputValue = parseFloat(this.displayValue);
+        
+        if (this.firstOperand === null && !isNaN(inputValue)) {
+          this.firstOperand = inputValue;
+        } else if (this.operator) {
+          const result = this.performCalculation();
+          this.displayValue = String(result);
+          this.firstOperand = result;
+        }
+        
+        this.waitingForSecondOperand = true;
+        this.operator = nextOperator;
+        this.updateDisplay();
+        this.setActiveOperator(nextOperator);
+      },
+      
+      calculate() {
+        const inputValue = parseFloat(this.displayValue);
+        
+        if (this.operator && !this.waitingForSecondOperand) {
+          const result = this.performCalculation();
+          this.displayValue = String(result);
+          this.firstOperand = result;
+          this.operator = null;
+          this.waitingForSecondOperand = true;
+          this.clearActiveOperator();
+          this.updateDisplay();
+        }
+      },
+      
+      performCalculation() {
+        const first = this.firstOperand;
+        const second = parseFloat(this.displayValue);
+        
+        if (this.operator === '+') return first + second;
+        if (this.operator === '−') return first - second;
+        if (this.operator === '×') return first * second;
+        if (this.operator === '÷') return first / second;
+        
+        return second;
+      },
+      
+      updateDisplay() {
+        const display = document.getElementById('display');
+        let value = this.displayValue;
+        
+        // Format the number
+        if (value.length > 9) {
+          // If too long, use scientific notation or truncate
+          const num = parseFloat(value);
+          if (Math.abs(num) > 999999999 || (Math.abs(num) < 0.000001 && num !== 0)) {
+            value = num.toExponential(5);
+          } else {
+            value = value.substring(0, 9);
+          }
+        }
+        
+        display.textContent = value;
+        
+        // Adjust font size based on length and screen size
+        const screenWidth = window.innerWidth;
+        let baseFontSize = 80;
+        
+        if (screenWidth <= 320) baseFontSize = 56;
+        else if (screenWidth <= 380) baseFontSize = 64;
+        else if (screenWidth >= 768) baseFontSize = 90;
+        
+        if (value.length > 6) {
+          display.style.fontSize = (baseFontSize * 0.75) + 'px';
+        } else {
+          display.style.fontSize = baseFontSize + 'px';
+        }
+      },
+      
+      setActiveOperator(op) {
+        this.clearActiveOperator();
+        const buttons = document.querySelectorAll('.operator');
+        buttons.forEach(btn => {
+          if (btn.textContent === op) {
+            btn.classList.add('active');
+          }
+        });
+      },
+      
+      clearActiveOperator() {
+        const buttons = document.querySelectorAll('.operator');
+        buttons.forEach(btn => btn.classList.remove('active'));
+      }
+    };
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') calc.inputNumber(e.key);
+      if (e.key === '.') calc.inputDecimal();
+      if (e.key === '+') calc.setOperation('+');
+      if (e.key === '-') calc.setOperation('−');
+      if (e.key === '*') calc.setOperation('×');
+      if (e.key === '/') { e.preventDefault(); calc.setOperation('÷'); }
+      if (e.key === 'Enter' || e.key === '=') calc.calculate();
+      if (e.key === 'Escape' || e.key === 'c') calc.clear();
+      if (e.key === '%') calc.percent();
+    });
+
+    // Prevent zoom on double tap (iOS and Android)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+
+    // Prevent context menu on long press (Android)
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    }, false);
+
+    // Handle Android back button
+    window.addEventListener('popstate', (e) => {
+      e.preventDefault();
+    });
+
+    // Update display on orientation change (Android and iOS)
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => calc.updateDisplay(), 100);
+    });
+
+    // Update display on resize (handles Android split screen, pop-up view)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        calc.updateDisplay();
+      }, 100);
+    });
+  </script>
+</body>
+  </html>
