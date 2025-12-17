@@ -8,7 +8,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#000000">
   <meta name="format-detection" content="telephone=no">
-  <title>iOS Calculator</title>
+  <link rel="manifest" id="manifest">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='50' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='85' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
+  <title>Calculator</title>
   <style>
     * {
       margin: 0;
@@ -118,7 +121,43 @@
       padding-left: 32px;
     }
 
-    /* Tablet adjustments */
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 15px 25px;
+      border-radius: 25px;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      gap: 15px;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .install-prompt button {
+      background: #ff9f0a;
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 15px;
+      font-size: 14px;
+      cursor: pointer;
+      aspect-ratio: auto;
+    }
+
+    .install-prompt .close {
+      background: transparent;
+      color: #999;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      font-size: 20px;
+    }
+
     @media (min-width: 768px) and (max-width: 1024px) {
       .calculator {
         max-width: 450px;
@@ -142,7 +181,6 @@
       }
     }
 
-    /* Small mobile devices */
     @media (max-width: 380px) {
       .calculator {
         padding: 15px;
@@ -174,7 +212,6 @@
       }
     }
 
-    /* Very small devices (older Android phones) */
     @media (max-width: 320px) {
       .display {
         font-size: 56px;
@@ -197,7 +234,6 @@
       }
     }
 
-    /* Large Android phones (6.5" - 7" screens) */
     @media (min-width: 400px) and (max-width: 480px) {
       .calculator {
         max-width: 420px;
@@ -220,7 +256,6 @@
       }
     }
 
-    /* Foldable phones (unfolded state) */
     @media (min-width: 600px) and (max-width: 767px) {
       .calculator {
         max-width: 480px;
@@ -231,7 +266,6 @@
       }
     }
 
-    /* Landscape mode */
     @media (orientation: landscape) and (max-height: 500px) {
       .calculator {
         max-height: 100vh;
@@ -262,7 +296,6 @@
       }
     }
 
-    /* Desktop hover effects */
     @media (hover: hover) {
       button:hover {
         filter: brightness(1.1);
@@ -274,33 +307,91 @@
   <div class="calculator">
     <div class="display" id="display">0</div>
     <div class="buttons">
-      <button class="function" onclick="calc.clear()">AC</button>
-      <button class="function" onclick="calc.toggleSign()">+/-</button>
-      <button class="function" onclick="calc.percent()">%</button>
-      <button class="operator" onclick="calc.setOperation('÷')">÷</button>
+      <button class="function" data-action="clear">AC</button>
+      <button class="function" data-action="sign">+/-</button>
+      <button class="function" data-action="percent">%</button>
+      <button class="operator" data-action="divide">÷</button>
       
-      <button class="num" onclick="calc.inputNumber('7')">7</button>
-      <button class="num" onclick="calc.inputNumber('8')">8</button>
-      <button class="num" onclick="calc.inputNumber('9')">9</button>
-      <button class="operator" onclick="calc.setOperation('×')">×</button>
+      <button class="num" data-number="7">7</button>
+      <button class="num" data-number="8">8</button>
+      <button class="num" data-number="9">9</button>
+      <button class="operator" data-action="multiply">×</button>
       
-      <button class="num" onclick="calc.inputNumber('4')">4</button>
-      <button class="num" onclick="calc.inputNumber('5')">5</button>
-      <button class="num" onclick="calc.inputNumber('6')">6</button>
-      <button class="operator" onclick="calc.setOperation('−')">−</button>
+      <button class="num" data-number="4">4</button>
+      <button class="num" data-number="5">5</button>
+      <button class="num" data-number="6">6</button>
+      <button class="operator" data-action="subtract">−</button>
       
-      <button class="num" onclick="calc.inputNumber('1')">1</button>
-      <button class="num" onclick="calc.inputNumber('2')">2</button>
-      <button class="num" onclick="calc.inputNumber('3')">3</button>
-      <button class="operator" onclick="calc.setOperation('+')">+</button>
+      <button class="num" data-number="1">1</button>
+      <button class="num" data-number="2">2</button>
+      <button class="num" data-number="3">3</button>
+      <button class="operator" data-action="add">+</button>
       
-      <button class="zero" onclick="calc.inputNumber('0')">0</button>
-      <button class="num" onclick="calc.inputDecimal()">.</button>
-      <button class="operator" onclick="calc.calculate()">=</button>
+      <button class="zero" data-number="0">0</button>
+      <button class="num" data-action="decimal">.</button>
+      <button class="operator" data-action="equals">=</button>
     </div>
   </div>
 
+  <div class="install-prompt" id="installPrompt">
+    <span>Install Calculator app?</span>
+    <button id="installBtn">Install</button>
+    <button class="close" id="closePrompt">✕</button>
+  </div>
+
   <script>
+    // Generate manifest dynamically
+    const manifestData = {
+      name: "Calculator",
+      short_name: "Calc",
+      description: "Simple Calculator App",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#000000",
+      theme_color: "#000000",
+      orientation: "portrait",
+      icons: [
+        {
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='120' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='240' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
+          sizes: "512x512",
+          type: "image/svg+xml",
+          purpose: "any maskable"
+        },
+        {
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='45' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='90' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
+          sizes: "192x192",
+          type: "image/svg+xml"
+        }
+      ]
+    };
+
+    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+    const manifestURL = URL.createObjectURL(manifestBlob);
+    document.getElementById('manifest').setAttribute('href', manifestURL);
+
+    // PWA Install Prompt
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installPrompt').style.display = 'flex';
+    });
+
+    document.getElementById('installBtn').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('installPrompt').style.display = 'none';
+      }
+    });
+
+    document.getElementById('closePrompt').addEventListener('click', () => {
+      document.getElementById('installPrompt').style.display = 'none';
+    });
+
+    // Calculator Logic
     const calc = {
       displayValue: '0',
       firstOperand: null,
@@ -308,15 +399,12 @@
       operator: null,
       
       inputNumber(num) {
-        const display = document.getElementById('display');
-        
         if (this.waitingForSecondOperand) {
           this.displayValue = num;
           this.waitingForSecondOperand = false;
         } else {
           this.displayValue = this.displayValue === '0' ? num : this.displayValue + num;
         }
-        
         this.updateDisplay();
       },
       
@@ -400,9 +488,7 @@
         const display = document.getElementById('display');
         let value = this.displayValue;
         
-        // Format the number
         if (value.length > 9) {
-          // If too long, use scientific notation or truncate
           const num = parseFloat(value);
           if (Math.abs(num) > 999999999 || (Math.abs(num) < 0.000001 && num !== 0)) {
             value = num.toExponential(5);
@@ -413,7 +499,6 @@
         
         display.textContent = value;
         
-        // Adjust font size based on length and screen size
         const screenWidth = window.innerWidth;
         let baseFontSize = 80;
         
@@ -444,6 +529,31 @@
       }
     };
 
+    // Event Delegation
+    document.querySelector('.buttons').addEventListener('click', (e) => {
+      const btn = e.target;
+      if (!btn.matches('button')) return;
+
+      const number = btn.dataset.number;
+      const action = btn.dataset.action;
+
+      if (number !== undefined) {
+        calc.inputNumber(number);
+      } else if (action) {
+        switch(action) {
+          case 'clear': calc.clear(); break;
+          case 'sign': calc.toggleSign(); break;
+          case 'percent': calc.percent(); break;
+          case 'decimal': calc.inputDecimal(); break;
+          case 'add': calc.setOperation('+'); break;
+          case 'subtract': calc.setOperation('−'); break;
+          case 'multiply': calc.setOperation('×'); break;
+          case 'divide': calc.setOperation('÷'); break;
+          case 'equals': calc.calculate(); break;
+        }
+      }
+    });
+
     // Keyboard support
     document.addEventListener('keydown', (e) => {
       if (e.key >= '0' && e.key <= '9') calc.inputNumber(e.key);
@@ -457,7 +567,7 @@
       if (e.key === '%') calc.percent();
     });
 
-    // Prevent zoom on double tap (iOS and Android)
+    // Prevent zoom on double tap
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
       const now = Date.now();
@@ -467,22 +577,17 @@
       lastTouchEnd = now;
     }, false);
 
-    // Prevent context menu on long press (Android)
+    // Prevent context menu on long press
     document.addEventListener('contextmenu', (e) => {
       e.preventDefault();
     }, false);
 
-    // Handle Android back button
-    window.addEventListener('popstate', (e) => {
-      e.preventDefault();
-    });
-
-    // Update display on orientation change (Android and iOS)
+    // Update display on orientation change
     window.addEventListener('orientationchange', () => {
       setTimeout(() => calc.updateDisplay(), 100);
     });
 
-    // Update display on resize (handles Android split screen, pop-up view)
+    // Update display on resize
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
@@ -490,6 +595,37 @@
         calc.updateDisplay();
       }, 100);
     });
+
+    // Register Service Worker for offline support
+    if ('serviceWorker' in navigator) {
+      // Create service worker inline
+      const swCode = `
+        self.addEventListener('install', (e) => {
+          self.skipWaiting();
+        });
+        
+        self.addEventListener('activate', (e) => {
+          e.waitUntil(self.clients.claim());
+        });
+        
+        self.addEventListener('fetch', (e) => {
+          e.respondWith(
+            fetch(e.request).catch(() => {
+              return new Response('App works offline', {
+                headers: { 'Content-Type': 'text/plain' }
+              });
+            })
+          );
+        });
+      `;
+      
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swURL = URL.createObjectURL(blob);
+      
+      navigator.serviceWorker.register(swURL)
+        .then(() => console.log('✅ Offline mode enabled'))
+        .catch((err) => console.log('Service Worker failed:', err));
+    }
   </script>
 </body>
   </html>
