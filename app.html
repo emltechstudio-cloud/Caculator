@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CalcPro</title>
+<meta name="theme-color" content="#f97316">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --orange:#f97316; --yellow:#eab308; --red:#ef4444; --green:#22c55e;
+  --bg:#ffffff; --surface:#f9fafb; --border:#e5e7eb;
+  --text:#111827; --muted:#6b7280; --dim:#9ca3af;
+  --btn:#f3f4f6; --btn-text:#111827;
+  --op:#fff7ed; --op-text:#c2410c;
+  --eq:#f97316; --eq-text:#ffffff;
+  --display-bg:#111827; --display-text:#ffffff;
+  --radius:12px;
+}
+[data-theme="dark"]{
+  --bg:#0f0f0f; --surface:#1a1a1a; --border:#2a2a2a;
+  --text:#f3f4f6; --muted:#9ca3af; --dim:#6b7280;
+  --btn:#1f1f1f; --btn-text:#f3f4f6;
+  --op:#2a1a0a; --op-text:#fb923c;
+  --display-bg:#000000; --display-text:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;transition:background .3s,color .3s}
+@media(display-mode:standalone){header{padding-top:max(14px,env(safe-area-inset-top))} .tab-bar{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
+
+/* Header */
+header{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:white}
+.logo-text{font-size:17px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
+.hdr-btns{display:flex;gap:6px}
+.hdr-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.hdr-btn:hover{color:var(--text);border-color:var(--orange)}
+
+/* Tab bar (top) */
+.tabs{display:flex;padding:10px 18px 0;gap:6px;flex-shrink:0}
+.tab{flex:1;padding:9px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:10px;background:var(--surface);border:1px solid var(--border);transition:all .2s}
+.tab.active{background:var(--orange);color:white;border-color:var(--orange)}
+
+/* Screens */
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* ── STANDARD ── */
+.display-wrap{background:var(--display-bg);margin:10px 14px 6px;border-radius:16px;padding:14px 18px;flex-shrink:0}
+.display-expr{font-size:13px;color:rgba(255,255,255,.45);min-height:18px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.display-val{font-size:42px;font-weight:300;color:var(--display-text);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.1;margin-top:4px}
+.display-val.small{font-size:28px}
+.calc-history{font-size:11px;color:rgba(255,255,255,.3);text-align:right;margin-top:4px;min-height:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 14px 14px;flex-shrink:0}
+.key{border:none;border-radius:var(--radius);font-size:18px;font-weight:500;cursor:pointer;padding:0;height:60px;display:flex;align-items:center;justify-content:center;transition:transform .1s,opacity .2s;font-family:inherit;color:var(--btn-text);background:var(--btn)}
+.key:active{transform:scale(.93);opacity:.8}
+.key.op{background:var(--op);color:var(--op-text);font-size:20px}
+.key.eq{background:var(--eq);color:var(--eq-text);font-size:22px;font-weight:700}
+.key.fn{background:var(--surface);color:var(--muted);font-size:14px;font-weight:600}
+.key.zero{grid-column:span 2;justify-content:flex-start;padding-left:22px}
+.key.danger{color:var(--red)}
+.key.accent{color:var(--orange);font-weight:700}
+
+/* ── SCIENTIFIC ── */
+.sci-display-wrap{background:var(--display-bg);margin:10px 14px 4px;border-radius:16px;padding:12px 16px;flex-shrink:0}
+.sci-mode-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.deg-toggle{display:flex;gap:0;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+.deg-btn{padding:3px 10px;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:inherit}
+.deg-btn.active{background:var(--orange);color:white;border-radius:5px}
+.inv-toggle{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.4);cursor:pointer}
+.inv-toggle.active{color:var(--orange)}
+.sci-expr{font-size:12px;color:rgba(255,255,255,.4);text-align:right;min-height:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sci-val{font-size:36px;font-weight:300;color:white;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.1}
+.sci-val.small{font-size:24px}
+
+.sci-keypad{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:4px 10px 10px}
+.sci-key{border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;height:48px;display:flex;align-items:center;justify-content:center;transition:transform .1s,opacity .2s;font-family:inherit;background:var(--surface);color:var(--muted);text-align:center;line-height:1.2}
+.sci-key:active{transform:scale(.92);opacity:.8}
+.sci-key.num{background:var(--btn);color:var(--btn-text);font-size:16px}
+.sci-key.op{background:var(--op);color:var(--op-text);font-size:15px}
+.sci-key.eq{background:var(--orange);color:white;font-size:17px;font-weight:700}
+.sci-key.fn{color:var(--orange);font-weight:700;font-size:11px}
+.sci-key.const{color:var(--yellow);font-size:13px}
+.sci-key.danger{color:var(--red)}
+.sci-key.accent{background:var(--surface);color:var(--muted)}
+
+/* ── FORMULA SOLVER ── */
+.formula-screen{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.cat-tabs{display:flex;gap:6px;padding:8px 14px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .2s;flex-shrink:0}
+.cat-tab.active{background:var(--orange);color:white;border-color:var(--orange)}
+
+.formula-list{flex:1;overflow-y:auto;padding:4px 14px 10px}
+.formula-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.formula-card:hover{border-color:var(--orange)}
+.formula-card.open{border-color:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,.1)}
+.formula-name{font-size:14px;font-weight:700;margin-bottom:3px}
+.formula-eq{font-size:16px;font-weight:600;color:var(--orange);margin-bottom:4px;font-family:Georgia,serif}
+.formula-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.formula-body{display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+.formula-card.open .formula-body{display:block}
+
+.var-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.var-label{font-size:12px;font-weight:600;color:var(--muted);min-width:90px;flex-shrink:0}
+.var-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:14px;color:var(--text);outline:none;font-family:inherit;transition:border-color .2s;-webkit-user-select:text;user-select:text}
+.var-input:focus{border-color:var(--orange)}
+.var-input:disabled{background:var(--surface);color:var(--muted);font-style:italic}
+.solve-for-row{margin-bottom:10px}
+.solve-for-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.solve-for-pills{display:flex;gap:6px;flex-wrap:wrap}
+.sf-pill{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
+.sf-pill.active{background:var(--orange);color:white;border-color:var(--orange)}
+.solve-btn{width:100%;padding:11px;background:var(--orange);color:white;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s;margin-top:4px}
+.solve-btn:hover{opacity:.88}
+.result-box{margin-top:10px;background:var(--display-bg);border-radius:10px;padding:14px;display:none}
+.result-box.show{display:block}
+.result-label{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:4px}
+.result-val{font-size:26px;font-weight:700;color:var(--orange)}
+.result-unit{font-size:13px;color:rgba(255,255,255,.5);margin-left:6px}
+.result-working{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.7;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}
+
+/* History panel */
+.hist-panel{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);border-radius:16px 16px 0 0;padding:16px 18px 32px;max-height:60vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s ease;z-index:200;box-shadow:0 -4px 24px rgba(0,0,0,.1)}
+.hist-panel.open{transform:translateY(0)}
+.hist-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px}
+.hist-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.hist-clear{font-size:12px;color:var(--red);cursor:pointer;font-weight:500}
+.hist-item{padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.hist-expr{font-size:13px;color:var(--muted)}
+.hist-res{font-size:16px;font-weight:600;color:var(--orange);cursor:pointer}
+.hist-empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:190;display:none}
+.backdrop.show{display:block}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon"><i class="fas fa-calculator"></i></div>
+    <span class="logo-text">CalcPro</span>
+  </div>
+  <div class="hdr-btns">
+    <button class="hdr-btn" id="histBtn" title="History"><i class="fas fa-history"></i></button>
+    <button class="hdr-btn" id="themeBtn" title="Theme"><i class="fas fa-moon" id="themeIcon"></i></button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('standard')">Standard</div>
+  <div class="tab" onclick="switchTab('scientific')">Scientific</div>
+  <div class="tab" onclick="switchTab('formulas')">Formulas</div>
+</div>
+
+<!-- STANDARD -->
+<div class="screen active" id="screen-standard">
+  <div class="display-wrap">
+    <div class="display-expr" id="stdExpr"></div>
+    <div class="display-val" id="stdVal">0</div>
+    <div class="calc-history" id="stdHist"></div>
+  </div>
+  <div class="keypad">
+    <button class="key fn danger" onclick="clearAll()">AC</button>
+    <button class="key fn accent" onclick="toggleSign()">+/−</button>
+    <button class="key fn accent" onclick="percent()">%</button>
+    <button class="key op" onclick="inputOp('÷')">÷</button>
+
+    <button class="key" onclick="inputNum('7')">7</button>
+    <button class="key" onclick="inputNum('8')">8</button>
+    <button class="key" onclick="inputNum('9')">9</button>
+    <button class="key op" onclick="inputOp('×')">×</button>
+
+    <button class="key" onclick="inputNum('4')">4</button>
+    <button class="key" onclick="inputNum('5')">5</button>
+    <button class="key" onclick="inputNum('6')">6</button>
+    <button class="key op" onclick="inputOp('−')">−</button>
+
+    <button class="key" onclick="inputNum('1')">1</button>
+    <button class="key" onclick="inputNum('2')">2</button>
+    <button class="key" onclick="inputNum('3')">3</button>
+    <button class="key op" onclick="inputOp('+')">+</button>
+
+    <button class="key zero" onclick="inputNum('0')">0</button>
+    <button class="key" onclick="inputDot()">.</button>
+    <button class="key eq" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<!-- SCIENTIFIC -->
+<div class="screen" id="screen-scientific">
+  <div class="sci-display-wrap">
+    <div class="sci-mode-row">
+      <div class="deg-toggle">
+        <button class="deg-btn active" id="degBtn" onclick="setAngle('deg')">DEG</button>
+        <button class="deg-btn" id="radBtn" onclick="setAngle('rad')">RAD</button>
+      </div>
+      <div class="inv-toggle" id="invToggle" onclick="toggleInv()">
+        <i class="fas fa-superscript"></i> INV
+      </div>
+    </div>
+    <div class="sci-expr" id="sciExpr"></div>
+    <div class="sci-val" id="sciVal">0</div>
+  </div>
+  <div class="sci-keypad" id="sciKeypad">
+    <!-- Row 1 -->
+    <button class="sci-key fn" onclick="sciFunc('sin')"><span id="sinLabel">sin</span></button>
+    <button class="sci-key fn" onclick="sciFunc('cos')"><span id="cosLabel">cos</span></button>
+    <button class="sci-key fn" onclick="sciFunc('tan')"><span id="tanLabel">tan</span></button>
+    <button class="sci-key fn" onclick="sciFunc('log')"><span id="logLabel">log</span></button>
+    <button class="sci-key fn" onclick="sciFunc('ln')">ln</button>
+    <!-- Row 2 -->
+    <button class="sci-key fn" onclick="sciFunc('sqrt')">√x</button>
+    <button class="sci-key fn" onclick="sciFunc('cbrt')">∛x</button>
+    <button class="sci-key fn" onclick="sciFunc('sq')">x²</button>
+    <button class="sci-key fn" onclick="sciFunc('cube')">x³</button>
+    <button class="sci-key fn" onclick="sciFunc('pow')">xʸ</button>
+    <!-- Row 3 -->
+    <button class="sci-key fn" onclick="sciFunc('inv')">1/x</button>
+    <button class="sci-key fn" onclick="sciFunc('abs')">|x|</button>
+    <button class="sci-key fn" onclick="sciFunc('fact')">n!</button>
+    <button class="sci-key fn" onclick="sciFunc('exp')">eˣ</button>
+    <button class="sci-key fn" onclick="sciFunc('10x')">10ˣ</button>
+    <!-- Row 4 -->
+    <button class="sci-key const" onclick="sciConst('pi')">π</button>
+    <button class="sci-key const" onclick="sciConst('e')">e</button>
+    <button class="sci-key accent" onclick="sciInput('(')">(</button>
+    <button class="sci-key accent" onclick="sciInput(')')">)</button>
+    <button class="sci-key danger" onclick="sciClear()">AC</button>
+    <!-- Row 5: numbers -->
+    <button class="sci-key num" onclick="sciNum('7')">7</button>
+    <button class="sci-key num" onclick="sciNum('8')">8</button>
+    <button class="sci-key num" onclick="sciNum('9')">9</button>
+    <button class="sci-key op" onclick="sciOp('÷')">÷</button>
+    <button class="sci-key danger" onclick="sciBackspace()">⌫</button>
+    <!-- Row 6 -->
+    <button class="sci-key num" onclick="sciNum('4')">4</button>
+    <button class="sci-key num" onclick="sciNum('5')">5</button>
+    <button class="sci-key num" onclick="sciNum('6')">6</button>
+    <button class="sci-key op" onclick="sciOp('×')">×</button>
+    <button class="sci-key fn accent" onclick="sciToggleSign()">+/−</button>
+    <!-- Row 7 -->
+    <button class="sci-key num" onclick="sciNum('1')">1</button>
+    <button class="sci-key num" onclick="sciNum('2')">2</button>
+    <button class="sci-key num" onclick="sciNum('3')">3</button>
+    <button class="sci-key op" onclick="sciOp('−')">−</button>
+    <button class="sci-key fn accent" onclick="sciPercent()">%</button>
+    <!-- Row 8 -->
+    <button class="sci-key num" onclick="sciNum('0')" style="grid-column:span 2;justify-content:flex-start;padding-left:18px">0</button>
+    <button class="sci-key num" onclick="sciDot()">.</button>
+    <button class="sci-key op" onclick="sciOp('+')">+</button>
+    <button class="sci-key eq" onclick="sciCalculate()">=</button>
+  </div>
+</div>
+
+<!-- FORMULA SOLVER -->
+<div class="screen" id="screen-formulas">
+  <div class="formula-screen">
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="formula-list" id="formulaList"></div>
+  </div>
+</div>
+
+<!-- History Panel -->
+<div class="backdrop" id="backdrop" onclick="closeHist()"></div>
+<div class="hist-panel" id="histPanel">
+  <div class="hist-handle"></div>
+  <div class="hist-title">
+    History
+    <span class="hist-clear" onclick="clearHistory()">Clear All</span>
+  </div>
+  <div id="histList"></div>
+</div>
+
+<script>
+'use strict';
+
+// ── Service Worker ──────────────────────────────────────────────────
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+// ── Theme ────────────────────────────────────────────────────────────
+const themeBtn = document.getElementById('themeBtn');
+const themeIcon = document.getElementById('themeIcon');
+function applyTheme(dark) {
+  dark ? document.body.setAttribute('data-theme','dark') : document.body.removeAttribute('data-theme');
+  themeIcon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+  localStorage.setItem('cp-theme', dark ? 'dark' : 'light');
+}
+const savedTheme = localStorage.getItem('cp-theme');
+applyTheme(savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme:dark)').matches);
+themeBtn.addEventListener('click', () => applyTheme(document.body.getAttribute('data-theme') !== 'dark'));
+
+// ── Tabs ─────────────────────────────────────────────────────────────
+const tabs = document.querySelectorAll('.tab');
+function switchTab(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  tabs.forEach((t,i) => t.classList.toggle('active', ['standard','scientific','formulas'][i] === name));
+}
+
+// ── History ───────────────────────────────────────────────────────────
+let history = JSON.parse(localStorage.getItem('cp-hist') || '[]');
+const histBtn = document.getElementById('histBtn');
+const histPanel = document.getElementById('histPanel');
+const backdrop = document.getElementById('backdrop');
+
+histBtn.addEventListener('click', openHist);
+function openHist() {
+  renderHist();
+  histPanel.classList.add('open');
+  backdrop.classList.add('show');
+}
+function closeHist() {
+  histPanel.classList.remove('open');
+  backdrop.classList.remove('show');
+}
+function addHist(expr, result) {
+  history.unshift({ expr, result });
+  if (history.length > 50) history.length = 50;
+  localStorage.setItem('cp-hist', JSON.stringify(history));
+}
+function clearHistory() {
+  history = [];
+  localStorage.removeItem('cp-hist');
+  renderHist();
+}
+function renderHist() {
+  const list = document.getElementById('histList');
+  if (!history.length) { list.innerHTML = '<div class="hist-empty">No calculations yet</div>'; return; }
+  list.innerHTML = history.map(h => `
+    <div class="hist-item">
+      <span class="hist-expr">${escHtml(h.expr)}</span>
+      <span class="hist-res" onclick="recallHist('${escHtml(String(h.result))}')">${escHtml(String(h.result))}</span>
+    </div>
+  `).join('');
+}
+function recallHist(val) {
+  stdDisplay = val;
+  updateStd();
+  closeHist();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// STANDARD CALCULATOR
+// ══════════════════════════════════════════════════════════════════════
+let stdDisplay = '0';
+let stdExpr = '';
+let stdOp = '';
+let stdPrev = '';
+let stdJustCalc = false;
+
+function updateStd() {
+  const el = document.getElementById('stdVal');
+  el.textContent = formatNum(stdDisplay);
+  el.className = 'display-val' + (stdDisplay.length > 10 ? ' small' : '');
+  document.getElementById('stdExpr').textContent = stdExpr;
+}
+
+function inputNum(n) {
+  if (stdJustCalc) { stdDisplay = n; stdExpr = ''; stdJustCalc = false; }
+  else stdDisplay = stdDisplay === '0' ? n : (stdDisplay.length < 15 ? stdDisplay + n : stdDisplay);
+  updateStd();
+}
+
+function inputDot() {
+  if (stdJustCalc) { stdDisplay = '0.'; stdJustCalc = false; }
+  else if (!stdDisplay.includes('.')) stdDisplay += '.';
+  updateStd();
+}
+
+function inputOp(op) {
+  stdJustCalc = false;
+  if (stdPrev && stdOp && !stdJustCalc) {
+    const res = compute(parseFloat(stdPrev), parseFloat(stdDisplay), stdOp);
+    stdDisplay = String(res);
+    stdPrev = String(res);
+  } else {
+    stdPrev = stdDisplay;
+  }
+  stdOp = op;
+  stdExpr = `${formatNum(stdPrev)} ${op}`;
+  stdJustCalc = true;
+  updateStd();
+}
+
+function calculate() {
+  if (!stdOp || !stdPrev) return;
+  const a = parseFloat(stdPrev);
+  const b = parseFloat(stdDisplay);
+  const expr = `${formatNum(stdPrev)} ${stdOp} ${formatNum(stdDisplay)}`;
+  const res = compute(a, b, stdOp);
+  addHist(expr, formatNum(String(res)));
+  document.getElementById('stdHist').textContent = expr + ' =';
+  stdDisplay = String(res);
+  stdExpr = '';
+  stdOp = '';
+  stdPrev = '';
+  stdJustCalc = true;
+  updateStd();
+}
+
+function compute(a, b, op) {
+  switch(op) {
+    case '+': return round(a + b);
+    case '−': return round(a - b);
+    case '×': return round(a * b);
+    case '÷': return b === 0 ? 'Error' : round(a / b);
+  }
+  return b;
+}
+
+function clearAll() { stdDisplay='0'; stdExpr=''; stdOp=''; stdPrev=''; stdJustCalc=false; document.getElementById('stdHist').textContent=''; updateStd(); }
+function toggleSign() { stdDisplay = stdDisplay.startsWith('-') ? stdDisplay.slice(1) : (stdDisplay !== '0' ? '-'+stdDisplay : '0'); updateStd(); }
+function percent() { stdDisplay = String(round(parseFloat(stdDisplay)/100)); updateStd(); }
+
+// ══════════════════════════════════════════════════════════════════════
+// SCIENTIFIC CALCULATOR
+// ══════════════════════════════════════════════════════════════════════
+let sciDisplay = '0';
+let sciExprStr = '';
+let sciPrev = '';
+let sciOpVal = '';
+let sciJustCalc = false;
+let angleMode = 'deg';
+let invMode = false;
+
+function updateSci() {
+  const el = document.getElementById('sciVal');
+  el.textContent = formatNum(sciDisplay);
+  el.className = 'sci-val' + (sciDisplay.length > 12 ? ' small' : '');
+  document.getElementById('sciExpr').textContent = sciExprStr;
+}
+
+function setAngle(mode) {
+  angleMode = mode;
+  document.getElementById('degBtn').classList.toggle('active', mode==='deg');
+  document.getElementById('radBtn').classList.toggle('active', mode==='rad');
+}
+
+function toggleInv() {
+  invMode = !invMode;
+  document.getElementById('invToggle').classList.toggle('active', invMode);
+  document.getElementById('sinLabel').textContent = invMode ? 'sin⁻¹' : 'sin';
+  document.getElementById('cosLabel').textContent = invMode ? 'cos⁻¹' : 'cos';
+  document.getElementById('tanLabel').textContent = invMode ? 'tan⁻¹' : 'tan';
+  document.getElementById('logLabel').textContent = invMode ? '10ˣ' : 'log';
+}
+
+function toRad(x) { return angleMode === 'deg' ? x * Math.PI/180 : x; }
+function toDeg(x) { return angleMode === 'deg' ? x * 180/Math.PI : x; }
+
+function sciNum(n) {
+  if (sciJustCalc) { sciDisplay = n; sciExprStr = ''; sciJustCalc = false; }
+  else sciDisplay = sciDisplay === '0' ? n : (sciDisplay.length < 15 ? sciDisplay + n : sciDisplay);
+  updateSci();
+}
+function sciDot() {
+  if (!sciDisplay.includes('.')) sciDisplay += '.';
+  updateSci();
+}
+function sciOp(op) {
+  sciJustCalc = false;
+  if (sciPrev && sciOpVal) {
+    const res = sciCompute(parseFloat(sciPrev), parseFloat(sciDisplay), sciOpVal);
+    sciDisplay = String(res);
+    sciPrev = String(res);
+  } else { sciPrev = sciDisplay; }
+  sciOpVal = op;
+  sciExprStr = `${formatNum(sciPrev)} ${op}`;
+  sciJustCalc = true;
+  updateSci();
+}
+function sciCalculate() {
+  if (!sciOpVal || !sciPrev) { sciExprStr = sciDisplay + ' ='; return; }
+  const a = parseFloat(sciPrev);
+  const b = parseFloat(sciDisplay);
+  const expr = `${formatNum(sciPrev)} ${sciOpVal} ${formatNum(sciDisplay)}`;
+  const res = sciCompute(a, b, sciOpVal);
+  addHist(expr, formatNum(String(res)));
+  sciDisplay = String(res);
+  sciExprStr = expr + ' =';
+  sciOpVal = ''; sciPrev = '';
+  sciJustCalc = true;
+  updateSci();
+}
+function sciCompute(a, b, op) {
+  switch(op) {
+    case '+': return round(a+b);
+    case '−': return round(a-b);
+    case '×': return round(a*b);
+    case '÷': return b===0 ? 'Error' : round(a/b);
+  }
+  return b;
+}
+function sciClear() { sciDisplay='0'; sciExprStr=''; sciOpVal=''; sciPrev=''; sciJustCalc=false; updateSci(); }
+function sciBackspace() {
+  sciDisplay = sciDisplay.length > 1 ? sciDisplay.slice(0,-1) : '0';
+  if (sciDisplay === '-') sciDisplay = '0';
+  updateSci();
+}
+function sciToggleSign() { sciDisplay = sciDisplay.startsWith('-') ? sciDisplay.slice(1) : (sciDisplay!=='0' ? '-'+sciDisplay : '0'); updateSci(); }
+function sciPercent() { sciDisplay = String(round(parseFloat(sciDisplay)/100)); updateSci(); }
+function sciInput(ch) { sciDisplay = sciDisplay === '0' ? ch : sciDisplay + ch; updateSci(); }
+
+function sciConst(c) {
+  const val = c === 'pi' ? String(Math.PI) : String(Math.E);
+  sciDisplay = sciJustCalc ? val : (sciDisplay==='0' ? val : sciDisplay + val);
+  sciJustCalc = false;
+  updateSci();
+}
+
+function sciFunc(fn) {
+  const x = parseFloat(sciDisplay);
+  let res, label;
+  if (invMode) {
+    switch(fn) {
+      case 'sin': res = toDeg(Math.asin(x)); label = `sin⁻¹(${x})`; break;
+      case 'cos': res = toDeg(Math.acos(x)); label = `cos⁻¹(${x})`; break;
+      case 'tan': res = toDeg(Math.atan(x)); label = `tan⁻¹(${x})`; break;
+      case 'log': res = Math.pow(10,x); label = `10^(${x})`; break;
+      default: break;
+    }
+    if (res !== undefined) { sciExprStr = label; sciDisplay = String(round(res)); sciJustCalc = true; updateSci(); return; }
+  }
+  switch(fn) {
+    case 'sin': res = round(Math.sin(toRad(x))); label = `sin(${x})`; break;
+    case 'cos': res = round(Math.cos(toRad(x))); label = `cos(${x})`; break;
+    case 'tan': res = Math.abs(Math.cos(toRad(x))) < 1e-10 ? 'Error' : round(Math.tan(toRad(x))); label = `tan(${x})`; break;
+    case 'log': res = x <= 0 ? 'Error' : round(Math.log10(x)); label = `log(${x})`; break;
+    case 'ln':  res = x <= 0 ? 'Error' : round(Math.log(x)); label = `ln(${x})`; break;
+    case 'sqrt': res = x < 0 ? 'Error' : round(Math.sqrt(x)); label = `√(${x})`; break;
+    case 'cbrt': res = round(Math.cbrt(x)); label = `∛(${x})`; break;
+    case 'sq':  res = round(x*x); label = `(${x})²`; break;
+    case 'cube':res = round(x*x*x); label = `(${x})³`; break;
+    case 'pow': sciOp('^'); return;
+    case 'inv': res = x===0 ? 'Error' : round(1/x); label = `1/(${x})`; break;
+    case 'abs': res = Math.abs(x); label = `|${x}|`; break;
+    case 'fact': res = factorial(Math.round(x)); label = `${Math.round(x)}!`; break;
+    case 'exp': res = round(Math.exp(x)); label = `e^(${x})`; break;
+    case '10x': res = round(Math.pow(10,x)); label = `10^(${x})`; break;
+    default: return;
+  }
+  addHist(label, String(res));
+  sciExprStr = label + ' =';
+  sciDisplay = String(res);
+  sciJustCalc = true;
+  updateSci();
+}
+
+function factorial(n) {
+  if (n < 0 || n > 170) return 'Error';
+  if (n === 0 || n === 1) return 1;
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// FORMULA SOLVER
+// ══════════════════════════════════════════════════════════════════════
+const FORMULAS = {
+  Physics: [
+    {
+      name: "Newton's Second Law",
+      eq: "F = m × a",
+      desc: "Force equals mass times acceleration. Used to calculate force, mass or acceleration of an object.",
+      vars: [
+        {id:'F', label:'Force (F)', unit:'N'},
+        {id:'m', label:'Mass (m)', unit:'kg'},
+        {id:'a', label:'Acceleration (a)', unit:'m/s²'}
+      ],
+      solve: {
+        F: (v) => v.m * v.a,
+        m: (v) => v.F / v.a,
+        a: (v) => v.F / v.m
+      },
+      working: {
+        F: (v) => `F = ${v.m} × ${v.a} = ${round(v.m*v.a)} N`,
+        m: (v) => `m = F ÷ a = ${v.F} ÷ ${v.a} = ${round(v.F/v.a)} kg`,
+        a: (v) => `a = F ÷ m = ${v.F} ÷ ${v.m} = ${round(v.F/v.m)} m/s²`
+      }
+    },
+    {
+      name: "Kinematic Equation",
+      eq: "v = u + at",
+      desc: "Final velocity equals initial velocity plus acceleration times time.",
+      vars: [
+        {id:'v', label:'Final Velocity (v)', unit:'m/s'},
+        {id:'u', label:'Initial Velocity (u)', unit:'m/s'},
+        {id:'a', label:'Acceleration (a)', unit:'m/s²'},
+        {id:'t', label:'Time (t)', unit:'s'}
+      ],
+      solve: {
+        v: (x) => x.u + x.a*x.t,
+        u: (x) => x.v - x.a*x.t,
+        a: (x) => (x.v - x.u)/x.t,
+        t: (x) => (x.v - x.u)/x.a
+      },
+      working: {
+        v: (x) => `v = ${x.u} + (${x.a} × ${x.t}) = ${round(x.u+x.a*x.t)} m/s`,
+        u: (x) => `u = v − at = ${x.v} − (${x.a} × ${x.t}) = ${round(x.v-x.a*x.t)} m/s`,
+        a: (x) => `a = (v−u) ÷ t = (${x.v}−${x.u}) ÷ ${x.t} = ${round((x.v-x.u)/x.t)} m/s²`,
+        t: (x) => `t = (v−u) ÷ a = (${x.v}−${x.u}) ÷ ${x.a} = ${round((x.v-x.u)/x.a)} s`
+      }
+    },
+    {
+      name: "Kinetic Energy",
+      eq: "KE = ½mv²",
+      desc: "The energy an object has due to its motion.",
+      vars: [
+        {id:'KE', label:'Kinetic Energy (KE)', unit:'J'},
+        {id:'m',  label:'Mass (m)', unit:'kg'},
+        {id:'v',  label:'Velocity (v)', unit:'m/s'}
+      ],
+      solve: {
+        KE: (x) => 0.5*x.m*x.v*x.v,
+        m:  (x) => (2*x.KE)/(x.v*x.v),
+        v:  (x) => Math.sqrt((2*x.KE)/x.m)
+      },
+      working: {
+        KE: (x) => `KE = 0.5 × ${x.m} × ${x.v}² = ${round(0.5*x.m*x.v*x.v)} J`,
+        m:  (x) => `m = 2KE ÷ v² = (2×${x.KE}) ÷ ${x.v}² = ${round(2*x.KE/(x.v*x.v))} kg`,
+        v:  (x) => `v = √(2KE÷m) = √(2×${x.KE}÷${x.m}) = ${round(Math.sqrt(2*x.KE/x.m))} m/s`
+      }
+    },
+    {
+      name: "Gravitational PE",
+      eq: "PE = mgh",
+      desc: "Potential energy stored in an object due to its height above a reference point.",
+      vars: [
+        {id:'PE', label:'Potential Energy (PE)', unit:'J'},
+        {id:'m',  label:'Mass (m)', unit:'kg'},
+        {id:'g',  label:'Gravity (g)', unit:'m/s²', default:'9.81'},
+        {id:'h',  label:'Height (h)', unit:'m'}
+      ],
+      solve: {
+        PE: (x) => x.m*x.g*x.h,
+        m:  (x) => x.PE/(x.g*x.h),
+        h:  (x) => x.PE/(x.m*x.g)
+      },
+      working: {
+        PE: (x) => `PE = ${x.m} × ${x.g} × ${x.h} = ${round(x.m*x.g*x.h)} J`,
+        m:  (x) => `m = PE ÷ (gh) = ${x.PE} ÷ (${x.g}×${x.h}) = ${round(x.PE/(x.g*x.h))} kg`,
+        h:  (x) => `h = PE ÷ (mg) = ${x.PE} ÷ (${x.m}×${x.g}) = ${round(x.PE/(x.m*x.g))} m`
+      }
+    },
+    {
+      name: "Ohm's Law",
+      eq: "V = I × R",
+      desc: "Voltage equals current times resistance in an electrical circuit.",
+      vars: [
+        {id:'V', label:'Voltage (V)', unit:'V'},
+        {id:'I', label:'Current (I)', unit:'A'},
+        {id:'R', label:'Resistance (R)', unit:'Ω'}
+      ],
+      solve: {
+        V: (x) => x.I*x.R,
+        I: (x) => x.V/x.R,
+        R: (x) => x.V/x.I
+      },
+      working: {
+        V: (x) => `V = ${x.I} × ${x.R} = ${round(x.I*x.R)} V`,
+        I: (x) => `I = V ÷ R = ${x.V} ÷ ${x.R} = ${round(x.V/x.R)} A`,
+        R: (x) => `R = V ÷ I = ${x.V} ÷ ${x.I} = ${round(x.V/x.I)} Ω`
+      }
+    },
+    {
+      name: "Power",
+      eq: "P = IV",
+      desc: "Electrical power equals current times voltage.",
+      vars: [
+        {id:'P', label:'Power (P)', unit:'W'},
+        {id:'I', label:'Current (I)', unit:'A'},
+        {id:'V', label:'Voltage (V)', unit:'V'}
+      ],
+      solve: {
+        P: (x) => x.I*x.V,
+        I: (x) => x.P/x.V,
+        V: (x) => x.P/x.I
+      },
+      working: {
+        P: (x) => `P = ${x.I} × ${x.V} = ${round(x.I*x.V)} W`,
+        I: (x) => `I = P ÷ V = ${x.P} ÷ ${x.V} = ${round(x.P/x.V)} A`,
+        V: (x) => `V = P ÷ I = ${x.P} ÷ ${x.I} = ${round(x.P/x.I)} V`
+      }
+    }
+  ],
+  Maths: [
+    {
+      name: "Quadratic Formula",
+      eq: "x = (−b ± √(b²−4ac)) / 2a",
+      desc: "Solves any quadratic equation ax² + bx + c = 0. Gives both roots.",
+      vars: [
+        {id:'a', label:'Coefficient a', unit:''},
+        {id:'b', label:'Coefficient b', unit:''},
+        {id:'c', label:'Coefficient c', unit:''}
+      ],
+      solve: {
+        x: (v) => {
+          const d = v.b*v.b - 4*v.a*v.c;
+          if (d < 0) return 'No real roots';
+          const x1 = round((-v.b + Math.sqrt(d))/(2*v.a));
+          const x2 = round((-v.b - Math.sqrt(d))/(2*v.a));
+          return x1 === x2 ? `x = ${x1}` : `x₁ = ${x1}, x₂ = ${x2}`;
+        }
+      },
+      solveFor: ['x'],
+      working: {
+        x: (v) => {
+          const d = v.b*v.b - 4*v.a*v.c;
+          return `Discriminant = b²−4ac = ${v.b}²−4×${v.a}×${v.c} = ${round(d)}\n${d<0?'Negative discriminant → no real roots':`x = (−${v.b} ± √${round(d)}) ÷ (2×${v.a})`}`;
+        }
+      }
+    },
+    {
+      name: "Pythagorean Theorem",
+      eq: "a² + b² = c²",
+      desc: "In a right-angled triangle, the square of the hypotenuse equals the sum of the squares of the other two sides.",
+      vars: [
+        {id:'a', label:'Side a', unit:''},
+        {id:'b', label:'Side b', unit:''},
+        {id:'c', label:'Hypotenuse c', unit:''}
+      ],
+      solve: {
+        a: (v) => Math.sqrt(v.c*v.c - v.b*v.b),
+        b: (v) => Math.sqrt(v.c*v.c - v.a*v.a),
+        c: (v) => Math.sqrt(v.a*v.a + v.b*v.b)
+      },
+      working: {
+        c: (v) => `c = √(a²+b²) = √(${v.a}²+${v.b}²) = √${v.a*v.a+v.b*v.b} = ${round(Math.sqrt(v.a*v.a+v.b*v.b))}`,
+        a: (v) => `a = √(c²−b²) = √(${v.c}²−${v.b}²) = ${round(Math.sqrt(v.c*v.c-v.b*v.b))}`,
+        b: (v) => `b = √(c²−a²) = √(${v.c}²−${v.a}²) = ${round(Math.sqrt(v.c*v.c-v.a*v.a))}`
+      }
+    },
+    {
+      name: "Simple Interest",
+      eq: "SI = PRT / 100",
+      desc: "Simple interest earned on a principal over time at a given rate.",
+      vars: [
+        {id:'SI', label:'Simple Interest (SI)', unit:''},
+        {id:'P',  label:'Principal (P)', unit:''},
+        {id:'R',  label:'Rate % per year (R)', unit:'%'},
+        {id:'T',  label:'Time (T)', unit:'years'}
+      ],
+      solve: {
+        SI: (v) => (v.P*v.R*v.T)/100,
+        P:  (v) => (v.SI*100)/(v.R*v.T),
+        R:  (v) => (v.SI*100)/(v.P*v.T),
+        T:  (v) => (v.SI*100)/(v.P*v.R)
+      },
+      working: {
+        SI: (v) => `SI = (P×R×T)/100 = (${v.P}×${v.R}×${v.T})/100 = ${round(v.P*v.R*v.T/100)}`,
+        P:  (v) => `P = (SI×100)/(R×T) = (${v.SI}×100)/(${v.R}×${v.T}) = ${round(v.SI*100/(v.R*v.T))}`,
+        R:  (v) => `R = (SI×100)/(P×T) = (${v.SI}×100)/(${v.P}×${v.T}) = ${round(v.SI*100/(v.P*v.T))}%`,
+        T:  (v) => `T = (SI×100)/(P×R) = (${v.SI}×100)/(${v.P}×${v.R}) = ${round(v.SI*100/(v.P*v.R))} years`
+      }
+    },
+    {
+      name: "Speed / Distance / Time",
+      eq: "S = D / T",
+      desc: "Speed equals distance divided by time.",
+      vars: [
+        {id:'S', label:'Speed (S)', unit:'m/s'},
+        {id:'D', label:'Distance (D)', unit:'m'},
+        {id:'T', label:'Time (T)', unit:'s'}
+      ],
+      solve: {
+        S: (v) => v.D/v.T,
+        D: (v) => v.S*v.T,
+        T: (v) => v.D/v.S
+      },
+      working: {
+        S: (v) => `S = D÷T = ${v.D}÷${v.T} = ${round(v.D/v.T)} m/s`,
+        D: (v) => `D = S×T = ${v.S}×${v.T} = ${round(v.S*v.T)} m`,
+        T: (v) => `T = D÷S = ${v.D}÷${v.S} = ${round(v.D/v.S)} s`
+      }
+    }
+  ],
+  Geometry: [
+    {
+      name: "Circle — Area & Circumference",
+      eq: "A = πr²,  C = 2πr",
+      desc: "Calculate the area or circumference of a circle from its radius.",
+      vars: [
+        {id:'r', label:'Radius (r)', unit:''},
+        {id:'A', label:'Area (A)', unit:''},
+        {id:'C', label:'Circumference (C)', unit:''}
+      ],
+      solve: {
+        A: (v) => Math.PI * v.r * v.r,
+        C: (v) => 2 * Math.PI * v.r,
+        r: (v) => v.A ? Math.sqrt(v.A/Math.PI) : v.C/(2*Math.PI)
+      },
+      working: {
+        A: (v) => `A = π × r² = π × ${v.r}² = ${round(Math.PI*v.r*v.r)}`,
+        C: (v) => `C = 2π × r = 2π × ${v.r} = ${round(2*Math.PI*v.r)}`,
+        r: (v) => v.A ? `r = √(A/π) = √(${v.A}/π) = ${round(Math.sqrt(v.A/Math.PI))}` : `r = C/(2π) = ${v.C}/(2π) = ${round(v.C/(2*Math.PI))}`
+      }
+    },
+    {
+      name: "Rectangle — Area & Perimeter",
+      eq: "A = l × w,  P = 2(l+w)",
+      desc: "Calculate the area or perimeter of a rectangle.",
+      vars: [
+        {id:'l', label:'Length (l)', unit:''},
+        {id:'w', label:'Width (w)', unit:''},
+        {id:'A', label:'Area (A)', unit:''},
+        {id:'P', label:'Perimeter (P)', unit:''}
+      ],
+      solve: {
+        A: (v) => v.l*v.w,
+        P: (v) => 2*(v.l+v.w),
+        l: (v) => v.A ? v.A/v.w : v.P/2 - v.w,
+        w: (v) => v.A ? v.A/v.l : v.P/2 - v.l
+      },
+      working: {
+        A: (v) => `A = l × w = ${v.l} × ${v.w} = ${round(v.l*v.w)}`,
+        P: (v) => `P = 2(l+w) = 2(${v.l}+${v.w}) = ${round(2*(v.l+v.w))}`,
+        l: (v) => v.A ? `l = A÷w = ${v.A}÷${v.w} = ${round(v.A/v.w)}` : `l = P/2 − w = ${v.P/2}−${v.w} = ${round(v.P/2-v.w)}`,
+        w: (v) => v.A ? `w = A÷l = ${v.A}÷${v.l} = ${round(v.A/v.l)}` : `w = P/2 − l = ${v.P/2}−${v.l} = ${round(v.P/2-v.l)}`
+      }
+    },
+    {
+      name: "Triangle — Area",
+      eq: "A = ½ × b × h",
+      desc: "Area of a triangle given its base and height.",
+      vars: [
+        {id:'A', label:'Area (A)', unit:''},
+        {id:'b', label:'Base (b)', unit:''},
+        {id:'h', label:'Height (h)', unit:''}
+      ],
+      solve: {
+        A: (v) => 0.5*v.b*v.h,
+        b: (v) => (2*v.A)/v.h,
+        h: (v) => (2*v.A)/v.b
+      },
+      working: {
+        A: (v) => `A = 0.5 × ${v.b} × ${v.h} = ${round(0.5*v.b*v.h)}`,
+        b: (v) => `b = 2A÷h = 2×${v.A}÷${v.h} = ${round(2*v.A/v.h)}`,
+        h: (v) => `h = 2A÷b = 2×${v.A}÷${v.b} = ${round(2*v.A/v.b)}`
+      }
+    },
+    {
+      name: "Volume of Sphere",
+      eq: "V = (4/3)πr³",
+      desc: "Volume of a sphere given its radius.",
+      vars: [
+        {id:'V', label:'Volume (V)', unit:''},
+        {id:'r', label:'Radius (r)', unit:''}
+      ],
+      solve: {
+        V: (v) => (4/3)*Math.PI*v.r*v.r*v.r,
+        r: (v) => Math.cbrt((3*v.V)/(4*Math.PI))
+      },
+      working: {
+        V: (v) => `V = (4/3)π×r³ = (4/3)×π×${v.r}³ = ${round((4/3)*Math.PI*v.r**3)}`,
+        r: (v) => `r = ∛(3V/4π) = ∛(3×${v.V}/4π) = ${round(Math.cbrt(3*v.V/(4*Math.PI)))}`
+      }
+    }
+  ],
+  Chemistry: [
+    {
+      name: "Moles",
+      eq: "n = m / M",
+      desc: "Number of moles equals mass divided by molar mass.",
+      vars: [
+        {id:'n', label:'Moles (n)', unit:'mol'},
+        {id:'m', label:'Mass (m)', unit:'g'},
+        {id:'M', label:'Molar Mass (M)', unit:'g/mol'}
+      ],
+      solve: {
+        n: (v) => v.m/v.M,
+        m: (v) => v.n*v.M,
+        M: (v) => v.m/v.n
+      },
+      working: {
+        n: (v) => `n = m÷M = ${v.m}÷${v.M} = ${round(v.m/v.M)} mol`,
+        m: (v) => `m = n×M = ${v.n}×${v.M} = ${round(v.n*v.M)} g`,
+        M: (v) => `M = m÷n = ${v.m}÷${v.n} = ${round(v.m/v.n)} g/mol`
+      }
+    },
+    {
+      name: "Ideal Gas Law",
+      eq: "PV = nRT",
+      desc: "Relates pressure, volume, moles and temperature of an ideal gas. R = 8.314 J/mol·K",
+      vars: [
+        {id:'P', label:'Pressure (P)', unit:'Pa'},
+        {id:'V', label:'Volume (V)', unit:'m³'},
+        {id:'n', label:'Moles (n)', unit:'mol'},
+        {id:'T', label:'Temperature (T)', unit:'K'},
+        {id:'R', label:'Gas Constant (R)', unit:'J/mol·K', default:'8.314'}
+      ],
+      solve: {
+        P: (v) => (v.n*v.R*v.T)/v.V,
+        V: (v) => (v.n*v.R*v.T)/v.P,
+        n: (v) => (v.P*v.V)/(v.R*v.T),
+        T: (v) => (v.P*v.V)/(v.n*v.R)
+      },
+      working: {
+        P: (v) => `P = nRT/V = (${v.n}×${v.R}×${v.T})/${v.V} = ${round(v.n*v.R*v.T/v.V)} Pa`,
+        V: (v) => `V = nRT/P = (${v.n}×${v.R}×${v.T})/${v.P} = ${round(v.n*v.R*v.T/v.P)} m³`,
+        n: (v) => `n = PV/RT = (${v.P}×${v.V})/(${v.R}×${v.T}) = ${round(v.P*v.V/(v.R*v.T))} mol`,
+        T: (v) => `T = PV/nR = (${v.P}×${v.V})/(${v.n}×${v.R}) = ${round(v.P*v.V/(v.n*v.R))} K`
+      }
+    },
+    {
+      name: "Concentration",
+      eq: "C = n / V",
+      desc: "Concentration of a solution in moles per litre.",
+      vars: [
+        {id:'C', label:'Concentration (C)', unit:'mol/L'},
+        {id:'n', label:'Moles (n)', unit:'mol'},
+        {id:'V', label:'Volume (V)', unit:'L'}
+      ],
+      solve: {
+        C: (v) => v.n/v.V,
+        n: (v) => v.C*v.V,
+        V: (v) => v.n/v.C
+      },
+      working: {
+        C: (v) => `C = n÷V = ${v.n}÷${v.V} = ${round(v.n/v.V)} mol/L`,
+        n: (v) => `n = C×V = ${v.C}×${v.V} = ${round(v.C*v.V)} mol`,
+        V: (v) => `V = n÷C = ${v.n}÷${v.C} = ${round(v.n/v.C)} L`
+      }
+    }
+  ]
+};
+
+// Render formula categories
+const cats = Object.keys(FORMULAS);
+const catTabs = document.getElementById('catTabs');
+let currentCat = cats[0];
+let openFormula = null;
+
+cats.forEach(cat => {
+  const btn = document.createElement('div');
+  btn.className = 'cat-tab' + (cat === currentCat ? ' active' : '');
+  btn.textContent = cat;
+  btn.addEventListener('click', () => {
+    currentCat = cat;
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.toggle('active', t.textContent === cat));
+    openFormula = null;
+    renderFormulas();
+  });
+  catTabs.appendChild(btn);
+});
+
+function renderFormulas() {
+  const list = document.getElementById('formulaList');
+  list.innerHTML = '';
+  FORMULAS[currentCat].forEach((f, idx) => {
+    const card = document.createElement('div');
+    card.className = 'formula-card' + (openFormula === idx ? ' open' : '');
+    const solveKeys = f.solveFor || Object.keys(f.solve);
+    const defaultSolveFor = solveKeys[0];
+    let selectedSolveFor = defaultSolveFor;
+
+    card.innerHTML = `
+      <div class="formula-name">${escHtml(f.name)}</div>
+      <div class="formula-eq">${escHtml(f.eq)}</div>
+      <div class="formula-desc">${escHtml(f.desc)}</div>
+      <div class="formula-body">
+        <div class="solve-for-row">
+          <div class="solve-for-label">Solve for</div>
+          <div class="solve-for-pills" id="sfp-${idx}">
+            ${solveKeys.map(k => `<div class="sf-pill${k===defaultSolveFor?' active':''}" data-k="${k}" onclick="setSolveFor(${idx},'${k}')">${k}</div>`).join('')}
+          </div>
+        </div>
+        ${f.vars.map(v => `
+          <div class="var-row">
+            <span class="var-label">${escHtml(v.label)}</span>
+            <input class="var-input" id="var-${idx}-${v.id}" type="number" placeholder="${v.default||'Enter value'}" ${v.default?`value="${v.default}"`:''} step="any" onclick="event.stopPropagation()">
+            ${v.unit ? `<span style="font-size:11px;color:var(--muted);min-width:36px">${escHtml(v.unit)}</span>` : ''}
+          </div>
+        `).join('')}
+        <button class="solve-btn" onclick="event.stopPropagation();solveFormula(${idx})">Calculate</button>
+        <div class="result-box" id="res-${idx}">
+          <div class="result-label">Result</div>
+          <div class="result-val" id="resval-${idx}"></div>
+          <div class="result-working" id="reswrk-${idx}"></div>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.classList.contains('sf-pill')) return;
+      openFormula = openFormula === idx ? null : idx;
+      renderFormulas();
+    });
+
+    list.appendChild(card);
+  });
+}
+
+function setSolveFor(idx, key) {
+  document.querySelectorAll(`#sfp-${idx} .sf-pill`).forEach(p => p.classList.toggle('active', p.dataset.k === key));
+  // Disable the solve-for variable's input
+  const f = FORMULAS[currentCat][idx];
+  f.vars.forEach(v => {
+    const inp = document.getElementById(`var-${idx}-${v.id}`);
+    if (inp) inp.disabled = (v.id === key);
+  });
+}
+
+function solveFormula(idx) {
+  const f = FORMULAS[currentCat][idx];
+  const sfp = document.querySelector(`#sfp-${idx} .sf-pill.active`);
+  const solveFor = sfp ? sfp.dataset.k : Object.keys(f.solve)[0];
+
+  // Collect values
+  const vals = {};
+  let missing = [];
+  f.vars.forEach(v => {
+    if (v.id === solveFor) return;
+    const inp = document.getElementById(`var-${idx}-${v.id}`);
+    const val = inp ? parseFloat(inp.value) : NaN;
+    if (isNaN(val)) missing.push(v.label);
+    else vals[v.id] = val;
+  });
+
+  const resBox = document.getElementById(`res-${idx}`);
+  const resVal = document.getElementById(`resval-${idx}`);
+  const resWrk = document.getElementById(`reswrk-${idx}`);
+
+  if (missing.length > 0) {
+    resVal.textContent = 'Please fill: ' + missing.map(m => m.split(' ')[0]).join(', ');
+    resVal.style.color = 'var(--red)';
+    resWrk.textContent = '';
+    resBox.classList.add('show');
+    return;
+  }
+
+  try {
+    const result = f.solve[solveFor](vals);
+    const working = f.working[solveFor] ? f.working[solveFor](vals) : '';
+    const unit = f.vars.find(v => v.id === solveFor)?.unit || '';
+
+    resVal.style.color = 'var(--orange)';
+    if (typeof result === 'string') {
+      resVal.textContent = result;
+      resWrk.textContent = working;
+    } else {
+      resVal.textContent = formatNum(String(round(result))) + (unit ? ` ${unit}` : '');
+      resWrk.textContent = working;
+      addHist(`${f.name} → ${solveFor}`, formatNum(String(round(result))));
+    }
+    resBox.classList.add('show');
+  } catch(e) {
+    resVal.textContent = 'Error: check your values';
+    resVal.style.color = 'var(--red)';
+    resWrk.textContent = '';
+    resBox.classList.add('show');
+  }
+}
+
+renderFormulas();
+
+// ── Utilities ─────────────────────────────────────────────────────────
+function round(n, dp=10) {
+  if (typeof n !== 'number' || isNaN(n) || !isFinite(n)) return 'Error';
+  return parseFloat(n.toPrecision(10));
+}
+
+function formatNum(s) {
+  if (s === 'Error' || s === 'Infinity') return s;
+  const n = parseFloat(s);
+  if (isNaN(n)) return s;
+  if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-10 && n !== 0)) return n.toExponential(6);
+  // Add thousands separators for display
+  const parts = String(round(n)).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  const activeScreen = document.querySelector('.screen.active').id;
+  if (activeScreen !== 'screen-standard') return;
+  const key = e.key;
+  if ('0123456789'.includes(key)) inputNum(key);
+  else if (key === '.') inputDot();
+  else if (key === '+') inputOp('+');
+  else if (key === '-') inputOp('−');
+  else if (key === '*') inputOp('×');
+  else if (key === '/') { e.preventDefault(); inputOp('÷'); }
+  else if (key === 'Enter' || key === '=') calculate();
+  else if (key === 'Escape') clearAll();
+  else if (key === 'Backspace') {
+    if (stdDisplay.length > 1) stdDisplay = stdDisplay.slice(0,-1);
+    else stdDisplay = '0';
+    updateStd();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,631 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#000000">
-  <meta name="format-detection" content="telephone=no">
-  <link rel="manifest" id="manifest">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='50' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='85' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
-  <title>Calculator</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalcPro — Advanced Calculator & Formula Solver</title>
+<meta name="description" content="Standard, scientific calculator and formula solver for students. Physics, Maths, Geometry, Chemistry. Free PWA.">
+<meta name="theme-color" content="#f97316">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--orange:#f97316;--yellow:#eab308;--bg:#fff;--surface:#f9fafb;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--shadow:0 1px 6px rgba(0,0,0,.08);--shadow-lg:0 4px 20px rgba(0,0,0,.12);--radius:14px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--border:#2a2a2a;--text:#f3f4f6;--muted:#9ca3af}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
 
-    html, body {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      position: fixed;
-      overscroll-behavior: none;
-    }
+nav{position:sticky;top:0;z-index:200;background:var(--bg);border-bottom:1px solid var(--border);padding:0 22px;height:60px;display:flex;align-items:center;justify-content:space-between;transition:background .3s,border-color .3s}
+.nav-logo{display:flex;align-items:center;gap:8px;user-select:none}
+.nav-logo-icon{width:28px;height:28px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:white}
+.nav-logo-text{font-size:17px;font-weight:800;color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:4px}
+.nav-link{color:var(--muted);font-size:14px;padding:7px 12px;border-radius:8px;transition:color .2s,background .2s;white-space:nowrap}
+.nav-link:hover{color:var(--text);background:var(--surface)}
+.theme-toggle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.theme-toggle:hover{color:var(--text);border-color:var(--orange)}
+.nav-open{background:var(--orange)!important;color:#fff!important;font-weight:600;border-radius:24px!important;padding:9px 20px!important;margin-left:4px}
+.nav-open:hover{opacity:.88}
+@media(max-width:640px){.nav-link:not(.nav-open){display:none}}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      touch-action: manipulation;
-    }
+.hero{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:72px 24px 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:600px;height:400px;background:radial-gradient(circle,rgba(249,115,22,.07) 0%,transparent 70%);top:-60px;left:50%;transform:translateX(-50%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--muted);margin-bottom:22px;letter-spacing:.04em}
+.hero-icon{width:80px;height:80px;background:var(--orange);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:38px;color:white;margin:0 auto 16px;box-shadow:0 8px 32px rgba(249,115,22,.3)}
+.hero-title{font-size:clamp(36px,8vw,72px);font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:8px;color:var(--text)}
+.hero-title span{color:var(--orange)}
+.hero-sub{font-size:18px;color:var(--muted);font-weight:300;margin-bottom:16px}
+.hero-desc{font-size:16px;color:var(--muted);max-width:440px;margin-bottom:36px;line-height:1.75}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:36px}
+.btn-primary{background:var(--orange);color:#fff;padding:14px 32px;border-radius:30px;font-size:16px;font-weight:700;display:inline-flex;align-items:center;gap:9px;transition:opacity .2s,transform .2s;box-shadow:0 4px 18px rgba(249,115,22,.3)}
+.btn-primary:hover{opacity:.88;transform:translateY(-2px)}
+.btn-outline{background:transparent;color:var(--text);padding:14px 32px;border-radius:30px;font-size:16px;font-weight:500;border:1px solid var(--border);display:inline-flex;align-items:center;gap:9px;transition:border-color .2s,transform .2s,background .2s}
+.btn-outline:hover{border-color:var(--orange);background:var(--surface);transform:translateY(-2px)}
+.hero-proof{display:flex;gap:20px;color:var(--muted);font-size:13px;flex-wrap:wrap;justify-content:center}
+.hero-proof span{display:flex;align-items:center;gap:5px}
+.hero-proof i{color:var(--orange)}
 
-    .calculator {
-      width: 100%;
-      max-width: 390px;
-      background: #000;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      max-height: 844px;
-    }
+section{padding:80px 24px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);margin-bottom:12px}
+.section-title{font-size:clamp(24px,4vw,38px);font-weight:700;line-height:1.22;margin-bottom:12px}
+.section-sub{color:var(--muted);font-size:16px;max-width:480px;line-height:1.7}
+.section-center{text-align:center;max-width:860px;margin:0 auto}
 
-    .display {
-      color: #fff;
-      font-size: 80px;
-      font-weight: 200;
-      text-align: right;
-      padding: 40px 20px 20px;
-      flex: 1;
-      display: flex;
-      align-items: flex-end;
-      justify-content: flex-end;
-      word-wrap: break-word;
-      word-break: break-all;
-      line-height: 1;
-      min-height: 120px;
-    }
+#modes{background:var(--surface);transition:background .3s}
+.modes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:44px auto 0;max-width:800px}
+.mode-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:left;transition:transform .2s,box-shadow .2s}
+.mode-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.mode-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.mode-card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.mode-card p{font-size:13px;color:var(--muted);line-height:1.6}
 
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      padding: 20px 0;
-    }
+#formulas{background:var(--bg);transition:background .3s}
+.formula-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin:44px auto 0;max-width:800px}
+.formula-cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;transition:transform .2s,border-color .2s}
+.formula-cat:hover{transform:translateY(-3px);border-color:var(--orange)}
+.formula-cat i{font-size:28px;margin-bottom:10px;display:block}
+.formula-cat h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.formula-cat p{font-size:12px;color:var(--muted)}
 
-    button {
-      aspect-ratio: 1;
-      border: none;
-      border-radius: 50%;
-      font-size: 32px;
-      font-weight: 400;
-      cursor: pointer;
-      transition: all 0.1s;
-      outline: none;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
+#feedback{background:var(--surface);transition:background .3s}
+.feedback-wrap{max-width:520px;margin:44px auto 0;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:30px;box-shadow:var(--shadow)}
+.feedback-wrap h3{font-size:16px;font-weight:700;margin-bottom:18px}
+.star-row{display:flex;gap:6px;margin-bottom:14px}
+.star{font-size:28px;cursor:pointer;color:var(--border);transition:color .15s,transform .15s;user-select:none;line-height:1}
+.star.lit,.star:hover{color:var(--yellow);transform:scale(1.15)}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.field input,.field textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--text);outline:none;font-family:inherit;resize:vertical;transition:border-color .2s,background .3s}
+.field input:focus,.field textarea:focus{border-color:var(--orange)}
+.field textarea{min-height:96px}
+.send-btn{width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .2s}
+.send-btn:hover{opacity:.88}
 
-    button:active {
-      filter: brightness(1.2);
-      transform: scale(0.95);
-    }
-
-    .num, .zero {
-      background: #333;
-      color: #fff;
-    }
-
-    .operator {
-      background: #ff9f0a;
-      color: #fff;
-      font-size: 40px;
-    }
-
-    .operator.active {
-      background: #fff;
-      color: #ff9f0a;
-    }
-
-    .function {
-      background: #a5a5a5;
-      color: #000;
-      font-size: 28px;
-    }
-
-    .zero {
-      grid-column: span 2;
-      border-radius: 50px;
-      aspect-ratio: 2.2 / 1;
-      text-align: left;
-      padding-left: 32px;
-    }
-
-    .install-prompt {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: #fff;
-      padding: 15px 25px;
-      border-radius: 25px;
-      font-size: 14px;
-      display: none;
-      align-items: center;
-      gap: 15px;
-      z-index: 1000;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
-    .install-prompt button {
-      background: #ff9f0a;
-      color: #fff;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 15px;
-      font-size: 14px;
-      cursor: pointer;
-      aspect-ratio: auto;
-    }
-
-    .install-prompt .close {
-      background: transparent;
-      color: #999;
-      padding: 0;
-      width: 30px;
-      height: 30px;
-      font-size: 20px;
-    }
-
-    @media (min-width: 768px) and (max-width: 1024px) {
-      .calculator {
-        max-width: 450px;
-        max-height: 900px;
-      }
-      
-      .display {
-        font-size: 90px;
-      }
-      
-      button {
-        font-size: 36px;
-      }
-      
-      .operator {
-        font-size: 44px;
-      }
-      
-      .function {
-        font-size: 32px;
-      }
-    }
-
-    @media (max-width: 380px) {
-      .calculator {
-        padding: 15px;
-      }
-      
-      .display {
-        font-size: 64px;
-        padding: 30px 15px 15px;
-      }
-      
-      button {
-        font-size: 26px;
-      }
-      
-      .operator {
-        font-size: 34px;
-      }
-      
-      .function {
-        font-size: 24px;
-      }
-      
-      .buttons {
-        gap: 10px;
-      }
-      
-      .zero {
-        padding-left: 26px;
-      }
-    }
-
-    @media (max-width: 320px) {
-      .display {
-        font-size: 56px;
-      }
-      
-      button {
-        font-size: 24px;
-      }
-      
-      .operator {
-        font-size: 30px;
-      }
-      
-      .function {
-        font-size: 22px;
-      }
-      
-      .buttons {
-        gap: 8px;
-      }
-    }
-
-    @media (min-width: 400px) and (max-width: 480px) {
-      .calculator {
-        max-width: 420px;
-      }
-      
-      .display {
-        font-size: 85px;
-      }
-      
-      button {
-        font-size: 34px;
-      }
-      
-      .operator {
-        font-size: 42px;
-      }
-      
-      .function {
-        font-size: 30px;
-      }
-    }
-
-    @media (min-width: 600px) and (max-width: 767px) {
-      .calculator {
-        max-width: 480px;
-      }
-      
-      .display {
-        font-size: 90px;
-      }
-    }
-
-    @media (orientation: landscape) and (max-height: 500px) {
-      .calculator {
-        max-height: 100vh;
-        padding: 10px;
-      }
-      
-      .display {
-        min-height: 80px;
-        padding: 20px 15px 10px;
-        font-size: 56px;
-      }
-      
-      .buttons {
-        padding: 10px 0;
-        gap: 8px;
-      }
-      
-      button {
-        font-size: 24px;
-      }
-      
-      .operator {
-        font-size: 30px;
-      }
-      
-      .function {
-        font-size: 22px;
-      }
-    }
-
-    @media (hover: hover) {
-      button:hover {
-        filter: brightness(1.1);
-      }
-    }
-  </style>
+footer{background:var(--bg);border-top:1px solid var(--border);padding:26px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;transition:background .3s,border-color .3s}
+.footer-logo{display:flex;align-items:center;gap:7px;user-select:none}
+.footer-logo-icon{width:24px;height:24px;background:var(--orange);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white}
+.footer-logo-text{font-size:15px;font-weight:800;color:var(--text)}
+.footer-right{font-size:12px;color:var(--muted);text-align:right}
+.footer-right a{color:var(--orange);text-decoration:underline;text-underline-offset:2px}
+@media(max-width:480px){.hero{padding:52px 20px 44px}.feedback-wrap{padding:22px 16px}footer{flex-direction:column;text-align:center}.footer-right{text-align:center}}
+</style>
 </head>
 <body>
-  <div class="calculator">
-    <div class="display" id="display">0</div>
-    <div class="buttons">
-      <button class="function" data-action="clear">AC</button>
-      <button class="function" data-action="sign">+/-</button>
-      <button class="function" data-action="percent">%</button>
-      <button class="operator" data-action="divide">÷</button>
-      
-      <button class="num" data-number="7">7</button>
-      <button class="num" data-number="8">8</button>
-      <button class="num" data-number="9">9</button>
-      <button class="operator" data-action="multiply">×</button>
-      
-      <button class="num" data-number="4">4</button>
-      <button class="num" data-number="5">5</button>
-      <button class="num" data-number="6">6</button>
-      <button class="operator" data-action="subtract">−</button>
-      
-      <button class="num" data-number="1">1</button>
-      <button class="num" data-number="2">2</button>
-      <button class="num" data-number="3">3</button>
-      <button class="operator" data-action="add">+</button>
-      
-      <button class="zero" data-number="0">0</button>
-      <button class="num" data-action="decimal">.</button>
-      <button class="operator" data-action="equals">=</button>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon"><i class="fas fa-calculator"></i></div>
+    <span class="nav-logo-text">CalcPro</span>
+  </div>
+  <div class="nav-right">
+    <a href="#modes" class="nav-link">Modes</a>
+    <a href="#formulas" class="nav-link">Formulas</a>
+    <a href="#feedback" class="nav-link">Feedback</a>
+    <a href="install.html" class="nav-link">Install</a>
+    <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon" id="themeIcon"></i></button>
+    <a href="app.html" class="nav-link nav-open">Open App</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge"><i class="fas fa-star" style="color:var(--yellow)"></i> Free · Works offline · No ads</div>
+  <div class="hero-icon"><i class="fas fa-calculator"></i></div>
+  <h1 class="hero-title">Calc<span>Pro</span></h1>
+  <p class="hero-sub">The calculator that actually teaches you</p>
+  <p class="hero-desc">Standard, scientific, and a formula solver that shows you the working — not just the answer. Built for students.</p>
+  <div class="hero-actions">
+    <a href="app.html" class="btn-primary"><i class="fas fa-calculator"></i> Open Calculator</a>
+    <a href="install.html" class="btn-outline"><i class="fas fa-download"></i> Install App</a>
+  </div>
+  <div class="hero-proof">
+    <span><i class="fas fa-check-circle"></i> Works offline</span>
+    <span><i class="fas fa-check-circle"></i> No account</span>
+    <span><i class="fas fa-check-circle"></i> No ads</span>
+    <span><i class="fas fa-check-circle"></i> Always free</span>
+  </div>
+</section>
+
+<section id="modes">
+  <div class="section-center">
+    <div class="section-label">3 Modes</div>
+    <h2 class="section-title">One app. Everything you need.</h2>
+    <p class="section-sub">Switch between modes with one tap. Each one designed to be fast and distraction-free.</p>
+    <div class="modes-grid">
+      <div class="mode-card">
+        <div class="mode-icon" style="background:rgba(249,115,22,.1);color:var(--orange)"><i class="fas fa-calculator"></i></div>
+        <h3>Standard</h3>
+        <p>Clean everyday calculator with history. Add, subtract, multiply, divide, percentages — all at your fingertips.</p>
+      </div>
+      <div class="mode-card">
+        <div class="mode-icon" style="background:rgba(234,179,8,.1);color:var(--yellow)"><i class="fas fa-superscript"></i></div>
+        <h3>Scientific</h3>
+        <p>Trigonometry, logarithms, powers, roots, factorial, constants (π, e), inverse functions, degree/radian toggle.</p>
+      </div>
+      <div class="mode-card">
+        <div class="mode-icon" style="background:rgba(34,197,94,.1);color:#16a34a"><i class="fas fa-book-open"></i></div>
+        <h3>Formula Solver</h3>
+        <p>Pick a formula, enter what you know, and it solves for the unknown — showing the full working step by step.</p>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="install-prompt" id="installPrompt">
-    <span>Install Calculator app?</span>
-    <button id="installBtn">Install</button>
-    <button class="close" id="closePrompt">✕</button>
+<section id="formulas">
+  <div class="section-center">
+    <div class="section-label">Formula Library</div>
+    <h2 class="section-title">Built for students.</h2>
+    <p class="section-sub">Covers the most common formulas across your core subjects. More added regularly.</p>
+    <div class="formula-cats">
+      <div class="formula-cat">
+        <i class="fas fa-atom" style="color:var(--orange)"></i>
+        <h3>Physics</h3>
+        <p>Newton's laws, kinematics, energy, Ohm's law, power</p>
+      </div>
+      <div class="formula-cat">
+        <i class="fas fa-square-root-alt" style="color:var(--yellow)"></i>
+        <h3>Maths</h3>
+        <p>Quadratic formula, Pythagoras, simple interest, speed/distance/time</p>
+      </div>
+      <div class="formula-cat">
+        <i class="fas fa-shapes" style="color:#3b82f6"></i>
+        <h3>Geometry</h3>
+        <p>Circle, rectangle, triangle, sphere — area, perimeter, volume</p>
+      </div>
+      <div class="formula-cat">
+        <i class="fas fa-flask" style="color:#16a34a"></i>
+        <h3>Chemistry</h3>
+        <p>Moles, ideal gas law, concentration, molar mass</p>
+      </div>
+    </div>
   </div>
+</section>
 
-  <script>
-    // Generate manifest dynamically
-    const manifestData = {
-      name: "Calculator",
-      short_name: "Calc",
-      description: "Simple Calculator App",
-      start_url: "./",
-      display: "standalone",
-      background_color: "#000000",
-      theme_color: "#000000",
-      orientation: "portrait",
-      icons: [
-        {
-          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='120' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='240' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
-          sizes: "512x512",
-          type: "image/svg+xml",
-          purpose: "any maskable"
-        },
-        {
-          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='45' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-size='90' fill='%23ff9f0a' font-family='Arial' font-weight='bold' text-anchor='middle' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
-          sizes: "192x192",
-          type: "image/svg+xml"
-        }
-      ]
-    };
+<section id="feedback">
+  <div class="section-center">
+    <div class="section-label">Feedback</div>
+    <h2 class="section-title">Tell us what to add next.</h2>
+    <p class="section-sub">Missing a formula? Found a bug? We read everything.</p>
+    <div class="feedback-wrap">
+      <h3>Share your thoughts</h3>
+      <div class="star-row" id="starRow">
+        <span class="star" data-v="1">★</span>
+        <span class="star" data-v="2">★</span>
+        <span class="star" data-v="3">★</span>
+        <span class="star" data-v="4">★</span>
+        <span class="star" data-v="5">★</span>
+      </div>
+      <div class="field"><label>Your Name <span style="font-weight:400;text-transform:none">(optional)</span></label><input type="text" id="fbName" placeholder="e.g. Chukwuemeka"></div>
+      <div class="field"><label>Your Feedback</label><textarea id="fbMessage" placeholder="What formula should we add? What's broken? What do you love?"></textarea></div>
+      <button class="send-btn" id="sendBtn"><i class="fas fa-envelope"></i> Send Feedback</button>
+    </div>
+  </div>
+</section>
 
-    const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-    const manifestURL = URL.createObjectURL(manifestBlob);
-    document.getElementById('manifest').setAttribute('href', manifestURL);
+<footer>
+  <div class="footer-logo">
+    <div class="footer-logo-icon"><i class="fas fa-calculator"></i></div>
+    <span class="footer-logo-text">CalcPro</span>
+  </div>
+  <div class="footer-right">
+    by <a href="https://emltechstudio.site" target="_blank" rel="noopener">EML Tech Studio</a><br>
+    &copy; 2026 EML Tech Studio &middot; emltechstudio@gmail.com
+  </div>
+</footer>
 
-    // PWA Install Prompt
-    let deferredPrompt;
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('installPrompt').style.display = 'flex';
-    });
+<script>
+const tt = document.getElementById('themeToggle');
+const ti = document.getElementById('themeIcon');
+function applyTheme(dark){dark?document.body.setAttribute('data-theme','dark'):document.body.removeAttribute('data-theme');ti.className=dark?'fas fa-sun':'fas fa-moon';localStorage.setItem('cp-site-theme',dark?'dark':'light')}
+const saved=localStorage.getItem('cp-site-theme');
+applyTheme(saved?saved==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches);
+tt.addEventListener('click',()=>applyTheme(document.body.getAttribute('data-theme')!=='dark'));
 
-    document.getElementById('installBtn').addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        document.getElementById('installPrompt').style.display = 'none';
-      }
-    });
+let rating=0;
+document.querySelectorAll('.star').forEach(s=>{
+  s.addEventListener('mouseover',()=>document.querySelectorAll('.star').forEach(st=>st.classList.toggle('lit',+st.dataset.v<=+s.dataset.v)));
+  s.addEventListener('mouseout',()=>document.querySelectorAll('.star').forEach(st=>st.classList.toggle('lit',+st.dataset.v<=rating)));
+  s.addEventListener('click',()=>{rating=+s.dataset.v;document.querySelectorAll('.star').forEach(st=>st.classList.toggle('lit',+st.dataset.v<=rating))});
+});
 
-    document.getElementById('closePrompt').addEventListener('click', () => {
-      document.getElementById('installPrompt').style.display = 'none';
-    });
-
-    // Calculator Logic
-    const calc = {
-      displayValue: '0',
-      firstOperand: null,
-      waitingForSecondOperand: false,
-      operator: null,
-      
-      inputNumber(num) {
-        if (this.waitingForSecondOperand) {
-          this.displayValue = num;
-          this.waitingForSecondOperand = false;
-        } else {
-          this.displayValue = this.displayValue === '0' ? num : this.displayValue + num;
-        }
-        this.updateDisplay();
-      },
-      
-      inputDecimal() {
-        if (this.waitingForSecondOperand) {
-          this.displayValue = '0.';
-          this.waitingForSecondOperand = false;
-          this.updateDisplay();
-          return;
-        }
-        
-        if (!this.displayValue.includes('.')) {
-          this.displayValue += '.';
-          this.updateDisplay();
-        }
-      },
-      
-      clear() {
-        this.displayValue = '0';
-        this.firstOperand = null;
-        this.waitingForSecondOperand = false;
-        this.operator = null;
-        this.clearActiveOperator();
-        this.updateDisplay();
-      },
-      
-      toggleSign() {
-        this.displayValue = String(parseFloat(this.displayValue) * -1);
-        this.updateDisplay();
-      },
-      
-      percent() {
-        this.displayValue = String(parseFloat(this.displayValue) / 100);
-        this.updateDisplay();
-      },
-      
-      setOperation(nextOperator) {
-        const inputValue = parseFloat(this.displayValue);
-        
-        if (this.firstOperand === null && !isNaN(inputValue)) {
-          this.firstOperand = inputValue;
-        } else if (this.operator) {
-          const result = this.performCalculation();
-          this.displayValue = String(result);
-          this.firstOperand = result;
-        }
-        
-        this.waitingForSecondOperand = true;
-        this.operator = nextOperator;
-        this.updateDisplay();
-        this.setActiveOperator(nextOperator);
-      },
-      
-      calculate() {
-        const inputValue = parseFloat(this.displayValue);
-        
-        if (this.operator && !this.waitingForSecondOperand) {
-          const result = this.performCalculation();
-          this.displayValue = String(result);
-          this.firstOperand = result;
-          this.operator = null;
-          this.waitingForSecondOperand = true;
-          this.clearActiveOperator();
-          this.updateDisplay();
-        }
-      },
-      
-      performCalculation() {
-        const first = this.firstOperand;
-        const second = parseFloat(this.displayValue);
-        
-        if (this.operator === '+') return first + second;
-        if (this.operator === '−') return first - second;
-        if (this.operator === '×') return first * second;
-        if (this.operator === '÷') return first / second;
-        
-        return second;
-      },
-      
-      updateDisplay() {
-        const display = document.getElementById('display');
-        let value = this.displayValue;
-        
-        if (value.length > 9) {
-          const num = parseFloat(value);
-          if (Math.abs(num) > 999999999 || (Math.abs(num) < 0.000001 && num !== 0)) {
-            value = num.toExponential(5);
-          } else {
-            value = value.substring(0, 9);
-          }
-        }
-        
-        display.textContent = value;
-        
-        const screenWidth = window.innerWidth;
-        let baseFontSize = 80;
-        
-        if (screenWidth <= 320) baseFontSize = 56;
-        else if (screenWidth <= 380) baseFontSize = 64;
-        else if (screenWidth >= 768) baseFontSize = 90;
-        
-        if (value.length > 6) {
-          display.style.fontSize = (baseFontSize * 0.75) + 'px';
-        } else {
-          display.style.fontSize = baseFontSize + 'px';
-        }
-      },
-      
-      setActiveOperator(op) {
-        this.clearActiveOperator();
-        const buttons = document.querySelectorAll('.operator');
-        buttons.forEach(btn => {
-          if (btn.textContent === op) {
-            btn.classList.add('active');
-          }
-        });
-      },
-      
-      clearActiveOperator() {
-        const buttons = document.querySelectorAll('.operator');
-        buttons.forEach(btn => btn.classList.remove('active'));
-      }
-    };
-
-    // Event Delegation
-    document.querySelector('.buttons').addEventListener('click', (e) => {
-      const btn = e.target;
-      if (!btn.matches('button')) return;
-
-      const number = btn.dataset.number;
-      const action = btn.dataset.action;
-
-      if (number !== undefined) {
-        calc.inputNumber(number);
-      } else if (action) {
-        switch(action) {
-          case 'clear': calc.clear(); break;
-          case 'sign': calc.toggleSign(); break;
-          case 'percent': calc.percent(); break;
-          case 'decimal': calc.inputDecimal(); break;
-          case 'add': calc.setOperation('+'); break;
-          case 'subtract': calc.setOperation('−'); break;
-          case 'multiply': calc.setOperation('×'); break;
-          case 'divide': calc.setOperation('÷'); break;
-          case 'equals': calc.calculate(); break;
-        }
-      }
-    });
-
-    // Keyboard support
-    document.addEventListener('keydown', (e) => {
-      if (e.key >= '0' && e.key <= '9') calc.inputNumber(e.key);
-      if (e.key === '.') calc.inputDecimal();
-      if (e.key === '+') calc.setOperation('+');
-      if (e.key === '-') calc.setOperation('−');
-      if (e.key === '*') calc.setOperation('×');
-      if (e.key === '/') { e.preventDefault(); calc.setOperation('÷'); }
-      if (e.key === 'Enter' || e.key === '=') calc.calculate();
-      if (e.key === 'Escape' || e.key === 'c') calc.clear();
-      if (e.key === '%') calc.percent();
-    });
-
-    // Prevent zoom on double tap
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, false);
-
-    // Prevent context menu on long press
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-    }, false);
-
-    // Update display on orientation change
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => calc.updateDisplay(), 100);
-    });
-
-    // Update display on resize
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        calc.updateDisplay();
-      }, 100);
-    });
-
-    // Register Service Worker for offline support
-    if ('serviceWorker' in navigator) {
-      // Create service worker inline
-      const swCode = `
-        self.addEventListener('install', (e) => {
-          self.skipWaiting();
-        });
-        
-        self.addEventListener('activate', (e) => {
-          e.waitUntil(self.clients.claim());
-        });
-        
-        self.addEventListener('fetch', (e) => {
-          e.respondWith(
-            fetch(e.request).catch(() => {
-              return new Response('App works offline', {
-                headers: { 'Content-Type': 'text/plain' }
-              });
-            })
-          );
-        });
-      `;
-      
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swURL = URL.createObjectURL(blob);
-      
-      navigator.serviceWorker.register(swURL)
-        .then(() => console.log('✅ Offline mode enabled'))
-        .catch((err) => console.log('Service Worker failed:', err));
-    }
-  </script>
+document.getElementById('sendBtn').addEventListener('click',()=>{
+  const msg=document.getElementById('fbMessage').value.trim();
+  const name=document.getElementById('fbName').value.trim();
+  if(!msg){document.getElementById('fbMessage').style.borderColor='#ef4444';setTimeout(()=>document.getElementById('fbMessage').style.borderColor='',1800);return}
+  const stars=rating>0?'★'.repeat(rating)+'☆'.repeat(5-rating)+` (${rating}/5)`:'No rating';
+  const subject=encodeURIComponent('CalcPro — Feedback');
+  const body=encodeURIComponent(`Rating: ${stars}\nFrom: ${name||'Anonymous'}\n\nFeedback:\n${msg}\n\n---\nSent from calcpro.afric.site`);
+  window.location.href=`mailto:emltechstudio@gmail.com?subject=${subject}&body=${body}`;
+});
+</script>
 </body>
-  </html>
+</html>

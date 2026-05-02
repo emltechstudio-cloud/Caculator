@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Install CalcPro</title>
+<meta name="theme-color" content="#f97316">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--orange:#f97316;--yellow:#eab308;--bg:#fff;--surface:#f9fafb;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--shadow:0 1px 6px rgba(0,0,0,.08);--radius:14px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--border:#2a2a2a;--text:#f3f4f6;--muted:#9ca3af}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+
+nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;transition:background .3s,border-color .3s}
+.nav-logo{display:flex;align-items:center;gap:7px;user-select:none}
+.nav-logo-icon{width:26px;height:26px;background:var(--orange);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;color:white}
+.nav-logo-text{font-size:16px;font-weight:800;color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.back-link{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);padding:6px 10px;border-radius:8px;transition:color .2s,background .2s}
+.back-link:hover{color:var(--text);background:var(--surface)}
+.theme-toggle{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.theme-toggle:hover{color:var(--text);border-color:var(--orange)}
+
+.hero{text-align:center;padding:48px 22px 28px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:400px;height:280px;background:radial-gradient(circle,rgba(249,115,22,.07) 0%,transparent 70%);top:-40px;left:50%;transform:translateX(-50%);pointer-events:none}
+.app-icon{width:88px;height:88px;border-radius:22px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:42px;color:white;margin:0 auto 16px;box-shadow:0 8px 32px rgba(249,115,22,.28);overflow:hidden}
+.app-icon img{width:100%;height:100%;object-fit:cover;border-radius:22px}
+.hero h1{font-size:clamp(22px,5vw,30px);font-weight:700;margin-bottom:8px}
+.hero p{color:var(--muted);font-size:14px;max-width:320px;margin:0 auto;line-height:1.65}
+
+.install-body{max-width:460px;margin:0 auto;padding:22px 18px 52px;flex:1}
+.install-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:14px;display:none;transition:background .3s,border-color .3s}
+.install-card.show{display:block}
+.install-card h2{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.install-btn{width:100%;padding:13px;background:var(--orange);color:#fff;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:opacity .2s;margin-bottom:10px}
+.install-btn:hover{opacity:.88}
+.already-msg{display:none;align-items:center;justify-content:center;gap:8px;padding:12px;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.2);border-radius:11px;color:var(--orange);font-size:13px;font-weight:600;margin-bottom:10px}
+.open-btn{display:block;text-align:center;padding:12px;border:1px solid var(--border);border-radius:11px;font-size:14px;font-weight:500;color:var(--text);transition:border-color .2s,background .2s}
+.open-btn:hover{border-color:var(--orange);background:var(--bg)}
+.ios-steps{display:flex;flex-direction:column;gap:14px}
+.ios-step{display:flex;align-items:flex-start;gap:12px}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--orange);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ios-step-text h4{font-size:14px;font-weight:600;margin-bottom:3px}
+.ios-step-text p{font-size:13px;color:var(--muted);line-height:1.5}
+.ios-step-text strong{color:var(--text)}
+.ios-note{margin-top:14px;padding:10px 13px;background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.2);border-radius:9px;font-size:12px;color:#92680b;display:flex;align-items:center;gap:7px}
+[data-theme="dark"] .ios-note{color:var(--yellow)}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.mini-feat{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:9px;transition:background .3s}
+.mini-feat i{font-size:14px}
+.mini-feat span{font-size:13px;font-weight:500}
+
+footer{border-top:1px solid var(--border);padding:16px 20px;text-align:center;font-size:12px;color:var(--muted);transition:border-color .3s}
+footer a{color:var(--orange);text-decoration:underline;text-underline-offset:2px}
+@media(max-width:480px){.hero{padding:36px 18px 22px}.install-card{padding:18px 14px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon"><i class="fas fa-calculator"></i></div>
+    <span class="nav-logo-text">CalcPro</span>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon" id="themeIcon"></i></button>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Home</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="app-icon">
+    <img src="apple-touch-icon.png" alt="CalcPro"
+         onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'fas fa-calculator\'></i>'">
+  </div>
+  <h1>Install CalcPro</h1>
+  <p>Add to your home screen. Calculate and solve formulas anywhere — even offline.</p>
+</div>
+
+<div class="install-body">
+
+  <!-- Android -->
+  <div class="install-card" id="androidCard">
+    <h2><i class="fab fa-android" style="color:#3ddc84"></i> Install on Android</h2>
+    <button class="install-btn" id="installBtn"><i class="fas fa-download"></i> Add to Home Screen</button>
+    <div class="already-msg" id="alreadyAndroid"><i class="fas fa-check-circle"></i> CalcPro is already installed</div>
+    <a href="app.html" class="open-btn"><i class="fas fa-external-link-alt"></i>&nbsp; Open in Browser</a>
+  </div>
+
+  <!-- iOS -->
+  <div class="install-card" id="iosCard">
+    <h2><i class="fab fa-apple" style="color:var(--text)"></i> Install on iPhone / iPad</h2>
+    <div class="ios-steps">
+      <div class="ios-step">
+        <div class="step-num">1</div>
+        <div class="ios-step-text">
+          <h4>Tap the Share button</h4>
+          <p>Find <i class="fas fa-share-from-square" style="color:var(--orange)"></i> at the bottom of Safari.</p>
+        </div>
+      </div>
+      <div class="ios-step">
+        <div class="step-num">2</div>
+        <div class="ios-step-text">
+          <h4>Tap "Add to Home Screen"</h4>
+          <p>Scroll the share sheet and tap <strong>"Add to Home Screen"</strong>.</p>
+        </div>
+      </div>
+      <div class="ios-step">
+        <div class="step-num">3</div>
+        <div class="ios-step-text">
+          <h4>Tap Add</h4>
+          <p>Confirm with <strong>Add</strong> in the top-right corner.</p>
+        </div>
+      </div>
+    </div>
+    <div class="ios-note"><i class="fas fa-exclamation-triangle"></i> Must be opened in <strong>&nbsp;Safari&nbsp;</strong> on iOS.</div>
+    <a href="app.html" class="open-btn" style="margin-top:16px"><i class="fas fa-external-link-alt"></i>&nbsp; Open in Browser</a>
+  </div>
+
+  <!-- Desktop -->
+  <div class="install-card" id="desktopCard">
+    <h2><i class="fas fa-desktop" style="color:var(--orange)"></i> Install on Desktop</h2>
+    <button class="install-btn" id="installBtnDesktop"><i class="fas fa-download"></i> Install App</button>
+    <div class="already-msg" id="alreadyDesktop"><i class="fas fa-check-circle"></i> CalcPro is already installed</div>
+    <a href="app.html" class="open-btn"><i class="fas fa-external-link-alt"></i>&nbsp; Open in Browser</a>
+  </div>
+
+  <div class="mini-grid">
+    <div class="mini-feat"><i class="fas fa-wifi-slash" style="color:var(--orange)"></i><span>Works offline</span></div>
+    <div class="mini-feat"><i class="fas fa-user-slash" style="color:var(--yellow)"></i><span>No account</span></div>
+    <div class="mini-feat"><i class="fas fa-store-slash" style="color:var(--orange)"></i><span>No app store</span></div>
+    <div class="mini-feat"><i class="fas fa-tag" style="color:var(--yellow)"></i><span>Always free</span></div>
+  </div>
+
+</div>
+
+<footer>
+  CalcPro by <a href="index.html">EML Tech Studio</a> &middot; emltechstudio@gmail.com
+</footer>
+
+<script>
+const tt=document.getElementById('themeToggle'),ti=document.getElementById('themeIcon');
+function applyTheme(dark){dark?document.body.setAttribute('data-theme','dark'):document.body.removeAttribute('data-theme');ti.className=dark?'fas fa-sun':'fas fa-moon';localStorage.setItem('cp-site-theme',dark?'dark':'light')}
+const saved=localStorage.getItem('cp-site-theme');
+applyTheme(saved?saved==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches);
+tt.addEventListener('click',()=>applyTheme(document.body.getAttribute('data-theme')!=='dark'));
+
+const ua=navigator.userAgent.toLowerCase();
+const isIOS=/iphone|ipad|ipod/.test(ua)&&!window.MSStream;
+const isAndroid=/android/.test(ua);
+const isInstalled=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone;
+
+if(isIOS) document.getElementById('iosCard').classList.add('show');
+else if(isAndroid) document.getElementById('androidCard').classList.add('show');
+else document.getElementById('desktopCard').classList.add('show');
+
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(isInstalled)markInstalled()});
+window.addEventListener('appinstalled',()=>{deferredPrompt=null;markInstalled()});
+if(isInstalled)markInstalled();
+
+function markInstalled(){
+  ['installBtn','installBtnDesktop'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none'});
+  ['alreadyAndroid','alreadyDesktop'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='flex'});
+}
+async function triggerInstall(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  const{outcome}=await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  if(outcome==='accepted')markInstalled();
+}
+document.getElementById('installBtn')?.addEventListener('click',triggerInstall);
+document.getElementById('installBtnDesktop')?.addEventListener('click',triggerInstall);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
